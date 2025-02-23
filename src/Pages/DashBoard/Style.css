@@ -1,0 +1,39 @@
+/* Default: Show table on desktop */
+.desktop-table {
+    display: table;
+  }
+  
+  /* Mobile Responsive Table */
+  .mobile-table {
+    display: none;
+  }
+  
+  /* Mobile View */
+  @media (max-width: 768px) {
+    .desktop-table {
+      display: none; /* Hide full table */
+    }
+  
+    .mobile-table {
+      display: block;
+    }
+  
+    .mobile-table-row {
+      display: flex;
+      flex-direction: column;
+      background: #f8f9fa;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    }
+  
+    .mobile-table-row p {
+      margin: 5px 0;
+    }
+  
+    .mobile-table-row strong {
+      color: #000;
+    }
+  }
+  
