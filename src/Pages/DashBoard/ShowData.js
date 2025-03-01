@@ -4,93 +4,77 @@ import { collection, getDocs, deleteDoc, doc, updateDoc, writeBatch, getDoc, que
 import { fireStore } from "../../Config/firebase";
 import { DeleteFilled, EditFilled } from "@ant-design/icons";
 import { Container } from "react-bootstrap";
-import { clone } from "lodash";
-import { User } from "react-feather";
-
-// const { Option } = Select;
+import { useAuthContext } from "../../Context/Auth";
 
 const ShowData = () => {
     const { Title } = Typography;
+    const { user } = useAuthContext();
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [riderList, setRiderList] = useState([]);
-    // const [riders, setRiders] = useState([]);
     const [newReceiver, setNewReceiver] = useState({});
     const [selectedRider, setSelectedRider] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [page, setPage] = useState(1);
     const [searchValue, setSearchValue] = useState('');
     const [isModalVisible, setIsModalVisible] = useState(false);
-    // const [editRecord, setEditRecord] = useState(null);
-    const [editingRecord, setEditingRecord] = useState(null)
+    const [editingRecord, setEditingRecord] = useState(null);
     const [form] = Form.useForm();
-    // const [editedValues, setEditedValues] = useState({});
     const inputRefs = useRef([]);
 
     useEffect(() => {
         fetchDeliveries();
-    }, []);
+        fetchRiders();
+    }, [user?.uid]);
 
     const fetchDeliveries = async () => {
         setLoading(true);
         try {
-            // ✅ Correcting Firestore query with orderBy
-            const deliveryQuery = query(collection(fireStore, "deliveries"),where("userId" , "==" , User.uid), orderBy("createdAt"));
-            // const deliveryQuery = query(collection(fireStore, "deliveries"))
+            const selectedDateString = selectedDate ? selectedDate.format("YYYY-MM-DD") : null;
+
+            let deliveryQuery = collection(fireStore, "deliveries");
+
+            let conditions = [where("deliveries", "==", user.uid)];
+            if (selectedRider) conditions.push(where("riderId", "==", selectedRider));
+            if (selectedDateString) conditions.push(where("date", "==", selectedDateString));
+
+            if (conditions.length > 0) {
+                deliveryQuery = query(deliveryQuery, ...conditions, orderBy("createdAt"));
+            } else {
+                deliveryQuery = query(deliveryQuery, orderBy("createdAt"));
+            }
+
             const querySnapshot = await getDocs(deliveryQuery);
             const deliveryList = querySnapshot.docs.map(doc => ({
                 id: doc.id,
-                source: "deliveries",
-                createdAt: doc.data().createdAt || "", // Avoids undefined issues
                 ...doc.data()
             }));
 
-            // ✅ Fetch riders collection
-            const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
-            const riders = riderQuerySnapshot.docs.map(doc => ({
-                id: doc.id,
-                name: doc.data().name || "Unknown" // Ensures no undefined values
-            }));
-
-            // ✅ Fetch shipper collection
-            const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
-            const shipperList = shipperSnapshot.docs.map(doc => ({
-                id: doc.id,
-                source: "shipper",
-                ...doc.data()
-            }));
-
-            // ✅ Create a map for fast lookup of riders
-            const riderMap = new Map(riders.map(rider => [rider.id, rider.name]));
-
-            // ✅ Assign rider names to deliveries
-            const updatedDeliveries = deliveryList.map(delivery => ({
-                ...delivery,
-                riderName: riderMap.get(delivery.riderId) || "Unknown"
-            }));
-
-            // ✅ Combine deliveries & shippers
-            const combinedData = [...updatedDeliveries, ...shipperList];
-
-            // ✅ Efficient state updates
-            setData(combinedData);
-            setFilteredData(combinedData);
-            setRiderList(riders);
+            setData(deliveryList);
+            setFilteredData(deliveryList);
         } catch (error) {
             console.error("Error fetching deliveries:", error);
+            if (error.code === 'failed-precondition') {
+                message.error("Please create the required Firestore index.");
+            }
         }
         setLoading(false);
     };
 
-    // ✅ Fetch deliveries on component mount
-    useEffect(() => {
-        fetchDeliveries();
-    }, []);
-
-    useEffect(() => {
-        fetchDeliveries();
-    }, []);
+    const fetchRiders = async () => {
+        try {
+            const riderQuery = query(collection(fireStore, "riders"), where("Created_By", "==", user.uid));
+            const querySnapshot = await getDocs(riderQuery);
+            const riders = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                name: doc.data().name || "Unknown"
+            }));
+            setRiderList(riders);
+        } catch (error) {
+            console.error("Error fetching riders:", error);
+        }
+    };
 
     const applyFilters = () => {
         let filtered = [...data];
@@ -103,15 +87,7 @@ const ShowData = () => {
         }
         setFilteredData(filtered);
     };
-    // const handleEdit = (record) => {
-    //     setEditingRecord(record);
-    //     form.setFieldsValue({
-    //         name: record.receiverName,
-    //         date: record.date,
-    //         consigneeName: record.consigneeName || record.consignee
-    //     });
-    //     setIsModalVisible(true);
-    // };
+
     const handleEdit = (record) => {
         if (!record) return; // Prevent errors if record is undefined
         setEditingRecord(record);
@@ -220,6 +196,7 @@ const ShowData = () => {
             message.error("Failed to save receiver names!");
         }
     };
+
     const handleModalOk = async () => {
         try {
             const values = await form.validateFields();
@@ -261,7 +238,7 @@ const ShowData = () => {
             setIsModalVisible(false);
             message.success("Record updated successfully!");
         } catch (error) {
-            console.error("Error updating record: ", error);
+            console.error("Error updating record:", error);
             message.error("Failed to update record!");
         }
     };
@@ -298,6 +275,7 @@ const ShowData = () => {
     };
 
     const handleModalCancel = () => { setIsModalVisible(false) };
+
     const columns = [
         {
             title: "#",
@@ -317,7 +295,6 @@ const ShowData = () => {
             dataIndex: ["shipperName" || "shipper"],
             key: "shipperName"
         },
-
         {
             title: "CN Number",
             dataIndex: "cnNumber",
@@ -325,9 +302,8 @@ const ShowData = () => {
         },
         {
             title: "Consignee Name",
-            dataIndex:  "consignee", // ✅ Correct way to handle multiple fields
+            dataIndex: "consignee",
             key: "consignee",
-         
         },
         {
             title: "Receiver Name",
@@ -340,7 +316,6 @@ const ShowData = () => {
                     onChange={(e) => handleReciverChange(e, record.cnNumber)}
                     onKeyDown={(e) => handleKeyPress(e, index)}
                 />
-
             ),
         },
         {
@@ -362,7 +337,7 @@ const ShowData = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="bg-danger  text-light" danger>
+                        <Button className="bg-danger text-light" danger>
                             <DeleteFilled />
                         </Button>
                     </Popconfirm>
@@ -373,10 +348,10 @@ const ShowData = () => {
 
     return (
         <main className="auth">
-            <Container className="my-3" >
+            <Container className="my-3">
                 <Row>
                     <Col span={24} className="mt-5">
-                        <Title level={1} className="text-light"> Show Data</Title>
+                        <Title level={1} className="text-light">Show Data</Title>
                         <Card className="border-1 mt-5 border-black">
                             <Card className="border-0">
                                 <Row>
@@ -392,11 +367,10 @@ const ShowData = () => {
                                             allowClear
                                             className="w-75"
                                             options={[
-                                                { value: null, label: "All Riders" },
+                                                { value: "", label: "All Riders" },
                                                 ...riderList.map(rider => ({ value: rider.id, label: rider.name }))
                                             ]}
                                         />
-
                                     </Col>
                                     <Col span={12}>
                                         <DatePicker className="border-1 w-75 border-black" placeholder="Select Date" onChange={setSelectedDate} />
@@ -409,13 +383,15 @@ const ShowData = () => {
                                         </Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Button className=" bg-success text-light ms-2" onClick={handleSaveReceiver}>
-                                            Save  Names
+                                        <Button className="bg-success text-light ms-2" onClick={handleSaveReceiver}>
+                                            Save Names
                                         </Button>
                                     </Col>
                                 </Row>
                             </Card>
-                            <Table bordered className="border-black border-1  "
+                            <Table
+                                bordered
+                                className="border-black border-1"
                                 dataSource={filteredData.map((item, index) => ({ ...item, key: item.id || index }))}
                                 columns={columns}
                                 loading={loading}
@@ -427,16 +403,12 @@ const ShowData = () => {
                                 }}
                                 scroll={{ x: 1000 }}
                             />
-
-                            <Modal title="Edit Record" visible={isModalVisible} onOk={handleModalOk} onCancel={handleModalCancel}>
+                            <Modal title="Edit Record" open={isModalVisible} onOk={handleModalOk} onCancel={handleModalCancel}>
                                 <Form form={form} layout="vertical">
                                     <Form.Item name="name" label="Receiver Name" rules={[{ required: true, message: 'Please input the receiver name!' }]}>
                                         <Input />
                                     </Form.Item>
-                                    {/* <Form.Item name="date" label="Date" rules={[{ required: true, message: 'Please input the date!' }]}>
-                                        <Input />
-                                    </Form.Item> */}
-                                    <Form.Item name="shipper" label="shipper" rules={[{ required: true, message: 'Please input the SipperName!' }]}>
+                                    <Form.Item name="shipper" label="Shipper" rules={[{ required: true, message: 'Please input the shipper name!' }]}>
                                         <Input />
                                     </Form.Item>
                                     <Form.Item name="consignee" label="Consignee Name" rules={[{ required: true, message: 'Please input the consignee name!' }]}>
@@ -444,15 +416,12 @@ const ShowData = () => {
                                     </Form.Item>
                                 </Form>
                             </Modal>
-
                         </Card>
                     </Col>
                 </Row>
             </Container>
-
         </main>
     );
 };
 
 export default ShowData;
-

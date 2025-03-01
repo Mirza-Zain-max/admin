@@ -36,8 +36,13 @@ const SideBar = ({ children }) => {
                         },
                         {
                             key: '4',
-                            icon: <LogoutOutlined />,
-                            label: <Button type="text" onClick={handleLogout} className='text-light '>LogOut</Button>,
+                            icon: <SettingFilled />,
+                            label: <Link to="/admin/allShowData">UserData</Link>,
+                        },
+                        {
+                            key: '5',
+                            icon: <Button type="text" onClick={handleLogout} className='text-light '><LogoutOutlined /> LogOut</Button>,
+                            // label: ,
                         },
                     ]}
                 />

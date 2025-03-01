@@ -34,27 +34,23 @@ const Login = () => {
     //             },1000)
     //         })
     // }
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         let { email, password } = state;
         setIsProcessing(true);
-        // Hardcoded Admin Credentials
-        const adminEmail = "admin@example.com";   // Change this
-        const adminPassword = "12345678";        // Change this
+        const adminEmail = "admin@example.com";
+        const adminPassword = "12345678";
         if (email === adminEmail && password === adminPassword) {
             message.success("Admin Login Successful");
             localStorage.setItem("user-login", true);
             localStorage.setItem("user-role", "admin");
-            navigate("/admin/dashboard", { replace: true }); // Redirect after 3 sec
+            navigate("/admin/dashboard", { replace: true });
             window.location.reload();
             return;
         }
         try {
-            // Normal User Login
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
             localStorage.setItem("user-login", true);
             localStorage.setItem("user-uid", user.uid);
             localStorage.setItem("user-role", "user");
@@ -64,7 +60,6 @@ const Login = () => {
             message.error("Invalid Email or Password");
         }
         setIsProcessing(false);
-
     };
 
     return (
@@ -107,4 +102,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default Login;

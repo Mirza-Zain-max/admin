@@ -71,7 +71,7 @@ const AuthProvider = ({ children }) => {
         signOut(auth)
             .then(() => {
                 message.success('Logout successful');
-                navigate("/auth/login");
+                navigate("/auth/register");
                 localStorage.clear()
             })
             .catch(() => {

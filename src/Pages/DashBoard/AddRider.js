@@ -114,7 +114,6 @@
 // };
 
 // export default AddRider;
-
 import { Button, Card, Col, Input, message, Row, Typography } from "antd";
 import React, { useEffect, useState, useRef } from "react";
 import { Container } from "react-bootstrap";
@@ -134,9 +133,7 @@ const AddRider = () => {
     useEffect(() => {
         const fetchRiders = async () => {
             const q = query(
-                collection(fireStore, "riders"),
-                where("Created_By", "==", user.uid), // Add where clause to filter by Created_By
-                orderBy('createdAt')
+                collection(fireStore, "riders"), where('Created_By', '==', user.uid)
             );
             const querySnapshot = await getDocs(q);
             const ridersList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -173,10 +170,12 @@ const AddRider = () => {
             setIsLoading(false);
             return;
         }
-
+    
         try {
             const newRiderData = { ...newRider, Created_By: user.uid }; // Include Created_By field
+            console.log("Adding new rider:", newRiderData); // Debugging
             const docRef = await addDoc(collection(fireStore, "riders"), newRiderData);
+            console.log("Document added with ID:", docRef.id); // Debugging
             setRiders((prevRiders) => [...prevRiders, { id: docRef.id, ...newRiderData }]);
             setNewRider({ name: "", contact: "", address: "" });
             message.success("Rider added successfully!");
@@ -203,10 +202,8 @@ const AddRider = () => {
         }
         try {
             await deleteDoc(doc(fireStore, "riders", riderToDelete.id));
-            setRiders(riders.filter((rider) => rider.id !== riderToDelete.id));
-            setNewRider({ name: "", contact: "", address: "" });
+            setRiders((prevRiders) => prevRiders.filter((rider) => rider.id !== riderToDelete.id));
             message.success("Rider deleted successfully!");
-            riderNameRef.current.focus();
         } catch (e) {
             console.error("Error deleting document:", e);
             message.error("Error deleting rider!");
