@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // import { Button, Card, Col, Input, message, Popconfirm, Row, Select, Typography } from "antd";
 // import React, { useState, useEffect, useRef } from "react";
 // import { Container } from "react-bootstrap";
@@ -224,60 +225,132 @@ const RunSheet = () => {
             message.error("Failed to delete rider!");
         }
     };
+// const saveDelivery = async (e) => {
+//     e.preventDefault();
+
+//     if (!delivery.riderId || !delivery.date || !delivery.cnNumber || !delivery.consignee) {
+//         message.error('Please fill all fields!');
+//         return;
+//     }
+
+//     const selectedRider = riders.find(rider => rider.id === delivery.riderId);
+//     const newDelivery = {
+//         ...delivery,
+//         status: "On Route",
+//         userId: user.uid,
+//         riderName: selectedRider ? selectedRider.name : "",
+//         createdAt: Date.now(),
+//     };
+
+//     try {
+//         const shipperCollection = await getDocs(collection(fireStore, "shipper"));
+
+//         const existingDoc = shipperCollection.docs.find(doc => doc.data().cnNumber === newDelivery.cnNumber);
+      
+//         const userCollection = await getDocs(collection(fireStore, "User Booking"));
+
+//         const useExisting = userCollection.docs.find(doc => doc.data().cnNumber === newDelivery.cnNumber);
+
+//         if ([existingDoc , useExisting]) {
+//             // Update the existing document in "shipper"
+//             await updateDoc(existingDoc.ref, {
+//                 status: "On Route",
+//                 riderId: delivery.riderId,
+//                 riderName: selectedRider ? selectedRider.name : "",
+//             });
+
+//             message.success('Rider added successfully!');
+//         } else {
+//             // If CN Number does not exist, add it to "deliveries"
+//             const docRef = await addDoc(collection(fireStore, "deliveries"), newDelivery);
+//             setDeliveries((prevDeliveries) => [...prevDeliveries, { id: docRef.id, ...newDelivery }]);
+//             message.success('Delivery saved successfully!');
+//         }
+
+//         // Reset CN Number and Consignee Name
+//         setDelivery((prev) => ({
+//             ...prev,
+//             cnNumber: '',
+//             consignee: '',
+//         }));
+
+//     } catch (error) {
+//         console.error("Error updating or adding document: ", error);
+//         message.error('Failed to save delivery!');
+//     } finally {
+//         if (cnNumberRef.current) {
+//             cnNumberRef.current.focus();
+//         }
+//     }
+//     console.log(newDelivery);
+// };
+
 const saveDelivery = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!delivery.riderId || !delivery.date || !delivery.cnNumber || !delivery.consignee) {
-        message.error('Please fill all fields!');
-        return;
+  if (!delivery.riderId || !delivery.date || !delivery.cnNumber || !delivery.consignee) {
+    message.error('Please fill all fields!');
+    return;
+  }
+
+  const selectedRider = riders.find(rider => rider.id === delivery.riderId);
+  const newDelivery = {
+    ...delivery,
+    status: "On Route",
+    userId: user.uid,
+    riderName: selectedRider ? selectedRider.name : "",
+    createdAt: Date.now(),
+  };
+
+  try {
+    const shipperCollection = await getDocs(collection(fireStore, "shipper"));
+    const existingDoc = shipperCollection.docs.find(doc => doc.data().cnNumber === newDelivery.cnNumber);
+
+    const userCollection = await getDocs(collection(fireStore, "User Booking"));
+    const useExisting = userCollection.docs.find(doc => doc.data().cnNumber === newDelivery.cnNumber);
+
+    if (existingDoc || useExisting) {
+      if (existingDoc) {
+        await updateDoc(existingDoc.ref, {
+          status: "On Route",
+          riderId: delivery.riderId,
+          riderName: selectedRider ? selectedRider.name : "",
+        });
+      }
+
+      if (useExisting) {
+        await updateDoc(useExisting.ref, {
+          status: "On Route",
+          riderId: delivery.riderId,
+          riderName: selectedRider ? selectedRider.name : "",
+        });
+      }
+
+      message.success('Rider added successfully!');
+    } else {
+      // Add to deliveries if CN Number is not found
+      const docRef = await addDoc(collection(fireStore, "deliveries"), newDelivery);
+      setDeliveries((prevDeliveries) => [...prevDeliveries, { id: docRef.id, ...newDelivery }]);
+      message.success('Delivery saved successfully!');
     }
 
-    const selectedRider = riders.find(rider => rider.id === delivery.riderId);
-    const newDelivery = {
-        ...delivery,
-        status: "On Route",
-        userId: user.uid,
-        riderName: selectedRider ? selectedRider.name : "",
-        createdAt: Date.now(),
-    };
+    // Reset input fields
+    setDelivery((prev) => ({
+      ...prev,
+      cnNumber: '',
+      consignee: '',
+    }));
 
-    try {
-        const shipperCollection = await getDocs(collection(fireStore, "shipper"));
-
-        const existingDoc = shipperCollection.docs.find(doc => doc.data().cnNumber === newDelivery.cnNumber);
-
-        if (existingDoc) {
-            // Update the existing document in "shipper"
-            await updateDoc(existingDoc.ref, {
-                status: "On Route",
-                riderId: delivery.riderId,
-                riderName: selectedRider ? selectedRider.name : "",
-            });
-
-            message.success('Rider added successfully!');
-        } else {
-            // If CN Number does not exist, add it to "deliveries"
-            const docRef = await addDoc(collection(fireStore, "deliveries"), newDelivery);
-            setDeliveries((prevDeliveries) => [...prevDeliveries, { id: docRef.id, ...newDelivery }]);
-            message.success('Delivery saved successfully!');
-        }
-
-        // Reset CN Number and Consignee Name
-        setDelivery((prev) => ({
-            ...prev,
-            cnNumber: '',
-            consignee: '',
-        }));
-
-    } catch (error) {
-        console.error("Error updating or adding document: ", error);
-        message.error('Failed to save delivery!');
-    } finally {
-        if (cnNumberRef.current) {
-            cnNumberRef.current.focus();
-        }
+  } catch (error) {
+    console.error("Error updating or adding document: ", error);
+    message.error('Failed to save delivery!');
+  } finally {
+    if (cnNumberRef.current) {
+      cnNumberRef.current.focus();
     }
-    console.log(newDelivery);
+  }
+
+  console.log(newDelivery);
 };
 
 const handleKeyDown = (e) => {

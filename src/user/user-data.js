@@ -2,14 +2,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Table, Select, DatePicker, Button, Modal, Input, message, Form, Row, Col, Card, Typography, Popconfirm } from "antd";
 import { collection, getDocs, deleteDoc, doc, updateDoc, writeBatch, getDoc, query, orderBy } from "firebase/firestore";
-import { fireStore } from "../../Config/firebase";
 import { DeleteFilled, EditFilled } from "@ant-design/icons";
 import { Container } from "react-bootstrap";
-import { clone } from "lodash";
+import { fireStore } from "../Config/firebase";
 
 // const { Option } = Select;
 
-const ShowData = () => {
+const UserData = () => {
     const { Title } = Typography;
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -54,12 +53,6 @@ const ShowData = () => {
             }));
 
             // ✅ Fetch shipper collection
-            const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
-            const shipperList = shipperSnapshot.docs.map(doc => ({
-                id: doc.id,
-                source: "shipper",
-                ...doc.data()
-            }));
             const userSnapshot = await getDocs(collection(fireStore, "User Booking"));
             const usershipperList = userSnapshot.docs.map(doc => ({
                 id: doc.id,
@@ -77,7 +70,7 @@ const ShowData = () => {
             }));
 
             // ✅ Combine deliveries & shippers
-            const combinedData = [...updatedDeliveries, ...shipperList, ...usershipperList];
+            const combinedData = [...updatedDeliveries, ...usershipperList];
 
             // ✅ Efficient state updates
             setData(combinedData);
@@ -126,13 +119,13 @@ const ShowData = () => {
             //   console.log("New Consignee:", newConsigneeValue);
 
             const deliveryRef = doc(fireStore, "deliveries", id);
-            const shipperRef = doc(fireStore, "shipper", id);
             const userRef = doc(fireStore, "User Booking", id);
+
             const deliverySnap = await getDoc(deliveryRef);
-            const shipperSnap = await getDoc(shipperRef);
             const userSnap = await getDoc(userRef);
+
             //   console.log("Delivery exists:", deliverySnap.exists());
-            //   console.log("Shipper exists:", shipperSnap.exists());
+            //   console.log("Shipper exists:", userSnap.exists());
 
             const updateData = { consignee: newConsigneeValue || "N/A" }; // ✅ Notice here!
 
@@ -143,10 +136,6 @@ const ShowData = () => {
                 await updateDoc(deliveryRef, updateData);
             }
 
-            if (shipperSnap.exists()) {
-                // console.log("Updating in Shipper...");
-                await updateDoc(shipperRef, updateData);
-            }
             if (userSnap.exists()) {
                 // console.log("Updating in Shipper...");
                 await updateDoc(userRef, updateData);
@@ -186,11 +175,11 @@ const ShowData = () => {
                 deleted = true;
             }
 
-            // Check if document exists in "shipper"
-            const shipperRef = doc(fireStore, "shipper", id);
-            const shipperSnap = await getDoc(shipperRef);
-            if (shipperSnap.exists()) {
-                await deleteDoc(shipperRef);
+            // Check if document exists in "User Booking"
+            const userRef = doc(fireStore, "User Booking", id);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                await deleteDoc(userRef);
                 deleted = true;
             }
 
@@ -224,18 +213,18 @@ const ShowData = () => {
     //         let hasUpdates = false;
 
     //         const deliveryRefs = filteredData.map(item => doc(fireStore, "deliveries", item.id));
-    //         const shipperRefs = filteredData.map(item => doc(fireStore, "shipper", item.id));
+    //         const shipperRefs = filteredData.map(item => doc(fireStore, "User Booking", item.id));
 
     //         const deliverySnaps = await Promise.all(deliveryRefs.map(ref => getDoc(ref)));
-    //         const shipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
+    //         const usershipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
 
     //         for (let i = 0; i < filteredData.length; i++) {
     //             const item = filteredData[i];
     //             if (newReceiver[item.cnNumber]) {
     //                 const deliverySnap = deliverySnaps[i];
-    //                 const shipperSnap = shipperSnaps[i];
+    //                 const userSnap = usershipperSnaps[i];
 
-    //                 if (!deliverySnap.exists() && !shipperSnap.exists()) {
+    //                 if (!deliverySnap.exists() && !userSnap.exists()) {
     //                     console.warn(`Document with ID ${item.id} does not exist in either collection!`);
     //                     continue;
     //                 }
@@ -247,7 +236,7 @@ const ShowData = () => {
     //                     });
     //                 }
 
-    //                 if (shipperSnap.exists()) {
+    //                 if (userSnap.exists()) {
     //                     batch.update(shipperRefs[i], {
     //                         receiverName: newReceiver[item.cnNumber],
     //                         status: "Delivered"
@@ -269,141 +258,59 @@ const ShowData = () => {
     //         message.error("Failed to save receiver names!");
     //     }
     // };
-    // const handleSaveReceiver = async () => {
-    //     try {
-    //         const batch = writeBatch(fireStore);
-    //         let hasUpdates = false;
-
-    //         const deliveryRefs = filteredData.map(item => doc(fireStore, "deliveries", item.id));
-    //         const shipperRefs = filteredData.map(item => doc(fireStore, "shipper", item.id));
-    //         const userRefs = filteredData.map(item => doc(fireStore, "User Booking", item.id));
-    //         const deliverySnaps = await Promise.all(deliveryRefs.map(ref => getDoc(ref)));
-    //         const shipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
-    //         const usershipperSnaps = await Promise.all(userRefs.map(ref => getDoc(ref)));
-    //         for (let i = 0; i < filteredData.length; i++) {
-    //             const item = filteredData[i];
-    //             if (newReceiver[item.cnNumber]) {
-    //                 const deliverySnap = deliverySnaps[i];
-    //                 const shipperSnap = shipperSnaps[i];
-    //                 const userSnap = usershipperSnaps[i];
-    //                 if (!deliverySnap.exists() && !shipperSnap.exists()) {
-    //                     console.warn(`Document with ID ${item.id} does not exist in either collection!`);
-    //                     continue;
-    //                 }
-
-    //                 if (deliverySnap.exists()) {
-    //                     batch.update(deliveryRefs[i], {
-    //                         receiverName: newReceiver[item.cnNumber],
-    //                         consigneeName: newReceiver[item.cnNumber],  // ✅ Add this line
-    //                         status: "Delivered"
-    //                     });
-    //                 }
-
-    //                 if (shipperSnap.exists()) {
-    //                     batch.update(shipperRefs[i], {
-    //                         receiverName: newReceiver[item.cnNumber],
-    //                         consigneeName: newReceiver[item.cnNumber],  // ✅ Add this line
-    //                         status: "Delivered"
-    //                     });
-    //                 }
-    //                  if (userSnap.exists()) {
-    //                     batch.update(userRefs[i], {
-    //                         receiverName: newReceiver[item.cnNumber],
-    //                         consigneeName: newReceiver[item.cnNumber],  // ✅ Add this line
-    //                         status: "Delivered"
-    //                     });
-    //                 }
-
-    //                 hasUpdates = true;
-    //             }
-    //         }
-
-    //         if (hasUpdates) {
-    //             await batch.commit();
-    //             message.success("Updated saved successfully");
-    //         } else {
-    //             message.warning("No valid records found to update!");
-    //         }
-    //     } catch (error) {
-    //         console.error("Error saving receiver names: ", error);
-    //         message.error("Failed to save receiver names!");
-    //     }
-    // };
-
     const handleSaveReceiver = async () => {
-  try {
-    const batch = writeBatch(fireStore);
-    let hasUpdates = false;
+        try {
+            const batch = writeBatch(fireStore);
+            let hasUpdates = false;
 
-    const deliveryRefs = filteredData.map(item => doc(fireStore, "deliveries", item.id));
-    const shipperRefs = filteredData.map(item => doc(fireStore, "shipper", item.id));
-    const userRefs = filteredData.map(item => doc(fireStore, "User Booking", item.id));
+            const deliveryRefs = filteredData.map(item => doc(fireStore, "deliveries", item.id));
+            const userRefs = filteredData.map(item => doc(fireStore, "User Booking", item.id));
 
-    const deliverySnaps = await Promise.all(deliveryRefs.map(ref => getDoc(ref)));
-    const shipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
-    const usershipperSnaps = await Promise.all(userRefs.map(ref => getDoc(ref)));
+            const deliverySnaps = await Promise.all(deliveryRefs.map(ref => getDoc(ref)));
+            const usershipperSnaps = await Promise.all(userRefs.map(ref => getDoc(ref)));
 
-    for (let i = 0; i < filteredData.length; i++) {
-      const item = filteredData[i];
-      const cn = String(item.cnNumber); // Ensure cnNumber is a string
+            for (let i = 0; i < filteredData.length; i++) {
+                const item = filteredData[i];
+                if (newReceiver[item.cnNumber]) {
+                    const deliverySnap = deliverySnaps[i];
+                    const userSnap = usershipperSnaps[i];
 
-      if (!cn) {
-        console.warn("⛔ Missing cnNumber in item:", item);
-        continue;
-      }
+                    if (!deliverySnap.exists() && !userSnap.exists()) {
+                        console.warn(`Document with ID ${item.id} does not exist in either collection!`);
+                        continue;
+                    }
 
-      if (newReceiver[cn]) {
-        const deliverySnap = deliverySnaps[i];
-        const shipperSnap = shipperSnaps[i];
-        const userSnap = usershipperSnaps[i];
+                    if (deliverySnap.exists()) {
+                        batch.update(deliveryRefs[i], {
+                            receiverName: newReceiver[item.cnNumber],
+                            consigneeName: newReceiver[item.cnNumber],  // ✅ Add this line
+                            status: "Delivered"
+                        });
+                    }
 
-        if (!deliverySnap.exists() && !shipperSnap.exists() && !userSnap.exists()) {
-          console.warn(`⚠️ Document with ID ${item.id} does not exist in any collection!`);
-          continue;
+                    if (userSnap.exists()) {
+                        batch.update(userRefs[i], {
+                            receiverName: newReceiver[item.cnNumber],
+                            consigneeName: newReceiver[item.cnNumber],  // ✅ Add this line
+                            status: "Delivered"
+                        });
+                    }
+
+                    hasUpdates = true;
+                }
+            }
+
+            if (hasUpdates) {
+                await batch.commit();
+                message.success("Updated saved successfully");
+            } else {
+                message.warning("No valid records found to update!");
+            }
+        } catch (error) {
+            console.error("Error saving receiver names: ", error);
+            message.error("Failed to save receiver names!");
         }
-
-        if (deliverySnap.exists()) {
-          batch.update(deliveryRefs[i], {
-            receiverName: newReceiver[cn],
-            consigneeName: newReceiver[cn],
-            status: "Delivered"
-          });
-        }
-
-        if (shipperSnap.exists()) {
-          batch.update(shipperRefs[i], {
-            receiverName: newReceiver[cn],
-            consigneeName: newReceiver[cn],
-            status: "Delivered"
-          });
-        }
-
-        if (userSnap.exists()) {
-          batch.update(userRefs[i], {
-            receiverName: newReceiver[cn],
-            consigneeName: newReceiver[cn],
-            status: "Delivered"
-          });
-        }
-
-        hasUpdates = true;
-      } else {
-        console.warn("❌ No receiver data found for CN:", cn);
-      }
-    }
-
-    if (hasUpdates) {
-      await batch.commit();
-      message.success("✅ Updates saved successfully");
-    } else {
-      message.warning("⚠️ No valid records found to update!");
-    }
-  } catch (error) {
-    console.error("🔥 Error saving receiver names:", error);
-    message.error("❌ Failed to save receiver names!");
-  }
-};
-
+    };
 
     // const handleModalOk = async () => {
     //     try {
@@ -424,11 +331,11 @@ const ShowData = () => {
     //         console.log("Updating Firestore with:", updateData); // Debugging
 
     //         const deliveryRef = doc(fireStore, "deliveries", editingRecord.id);
-    //         const shipperRef = doc(fireStore, "shipper", editingRecord.id);
+    //         const userRef = doc(fireStore, "User Booking", editingRecord.id);
 
     //         // Check if documents exist
     //         const deliveryDocSnap = await getDoc(deliveryRef);
-    //         const shipperDocSnap = await getDoc(shipperRef);
+    //         const shipperDocSnap = await getDoc(userRef);
 
     //         if (!deliveryDocSnap.exists() && !shipperDocSnap.exists()) {
     //             message.error("Record does not exist!");
@@ -438,7 +345,7 @@ const ShowData = () => {
     //         // Update both documents if they exist
     //         const updatePromises = [];
     //         if (deliveryDocSnap.exists()) updatePromises.push(updateDoc(deliveryRef, updateData));
-    //         if (shipperDocSnap.exists()) updatePromises.push(updateDoc(shipperRef, updateData));
+    //         if (shipperDocSnap.exists()) updatePromises.push(updateDoc(userRef, updateData));
 
     //         await Promise.all(updatePromises);
 
@@ -524,7 +431,7 @@ const ShowData = () => {
         },
         {
             title: "Shipper Name",
-            dataIndex: ["shipperName" || "shipper"],
+            dataIndex: ["shipperName" || "User Booking"],
             key: "shipperName"
         },
 
@@ -543,7 +450,7 @@ const ShowData = () => {
             title: "Receiver Name",
             key: "receiverName",
             render: (record, _, index) => (
-                <Input
+                <Input disabled
                     className="border-0"
                     defaultValue={record.receiverName}
                     ref={(ref) => (inputRefs.current[index] = ref)}
@@ -646,7 +553,7 @@ const ShowData = () => {
                                     {/* <Form.Item name="date" label="Date" rules={[{ required: true, message: 'Please input the date!' }]}>
                                         <Input />
                                     </Form.Item> 
-                                    <Form.Item name="shipper" label="shipper" rules={[{ required: true, message: 'Please input the SipperName!' }]}>
+                                    <Form.Item name="User Booking" label="User Booking" rules={[{ required: true, message: 'Please input the SipperName!' }]}>
                                         <Input />
                                     </Form.Item>
                                     <Form.Item name="consignee" label="Consignee Name" rules={[{ required: true, message: 'Please input the consignee name!' }]}>
@@ -679,7 +586,7 @@ const ShowData = () => {
     );
 };
 
-export default ShowData;
+export default UserData;
 
 
 
@@ -803,11 +710,11 @@ export default ShowData;
 //                 deleted = true;
 //             }
 
-//             // Check if document exists in "shipper"
-//             const shipperRef = doc(fireStore, "shipper", id);
-//             const shipperSnap = await getDoc(shipperRef);
-//             if (shipperSnap.exists()) {
-//                 await deleteDoc(shipperRef);
+//             // Check if document exists in "User Booking"
+//             const userRef = doc(fireStore, "User Booking", id);
+//             const userSnap = await getDoc(userRef);
+//             if (userSnap.exists()) {
+//                 await deleteDoc(userRef);
 //                 deleted = true;
 //             }
 
@@ -841,18 +748,18 @@ export default ShowData;
 //             let hasUpdates = false;
 
 //             const deliveryRefs = filteredData.map(item => doc(fireStore, "deliveries", item.id));
-//             const shipperRefs = filteredData.map(item => doc(fireStore, "shipper", item.id));
+//             const shipperRefs = filteredData.map(item => doc(fireStore, "User Booking", item.id));
 
 //             const deliverySnaps = await Promise.all(deliveryRefs.map(ref => getDoc(ref)));
-//             const shipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
+//             const usershipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
 
 //             for (let i = 0; i < filteredData.length; i++) {
 //                 const item = filteredData[i];
 //                 if (newReceiver[item.cnNumber]) {
 //                     const deliverySnap = deliverySnaps[i];
-//                     const shipperSnap = shipperSnaps[i];
+//                     const userSnap = usershipperSnaps[i];
 
-//                     if (!deliverySnap.exists() && !shipperSnap.exists()) {
+//                     if (!deliverySnap.exists() && !userSnap.exists()) {
 //                         console.warn(`Document with ID ${item.id} does not exist in either collection!`);
 //                         continue;
 //                     }
@@ -864,7 +771,7 @@ export default ShowData;
 //                         });
 //                     }
 
-//                     if (shipperSnap.exists()) {
+//                     if (userSnap.exists()) {
 //                         batch.update(shipperRefs[i], {
 //                             receiverName: newReceiver[item.cnNumber],
 //                             status: "Delivered"
@@ -906,11 +813,11 @@ export default ShowData;
 //             console.log("Updating Firestore with:", updateData); // Debugging
 
 //             const deliveryRef = doc(fireStore, "deliveries", editingRecord.id);
-//             const shipperRef = doc(fireStore, "shipper", editingRecord.id);
+//             const userRef = doc(fireStore, "User Booking", editingRecord.id);
 
 //             // Check if documents exist
 //             const deliveryDocSnap = await getDoc(deliveryRef);
-//             const shipperDocSnap = await getDoc(shipperRef);
+//             const shipperDocSnap = await getDoc(userRef);
 
 //             if (!deliveryDocSnap.exists() && !shipperDocSnap.exists()) {
 //                 message.error("Record does not exist!");
@@ -920,7 +827,7 @@ export default ShowData;
 //             // Update both documents if they exist
 //             const updatePromises = [];
 //             if (deliveryDocSnap.exists()) updatePromises.push(updateDoc(deliveryRef, updateData));
-//             if (shipperDocSnap.exists()) updatePromises.push(updateDoc(shipperRef, updateData));
+//             if (shipperDocSnap.exists()) updatePromises.push(updateDoc(userRef, updateData));
 
 //             await Promise.all(updatePromises);
 
@@ -1098,7 +1005,7 @@ export default ShowData;
 //                                     <Form.Item name="name" label="Receiver Name" rules={[{ required: true, message: 'Please input the receiver name!' }]}>
 //                                         <Input />
 //                                     </Form.Item>
-//                                     <Form.Item name="shipper" label="Shipper" rules={[{ required: true, message: 'Please input the shipper name!' }]}>
+//                                     <Form.Item name="User Booking" label="User Booking" rules={[{ required: true, message: 'Please input the shipper name!' }]}>
 //                                         <Input />
 //                                     </Form.Item>
 //                                     <Form.Item name="consignee" label="Consignee Name" rules={[{ required: true, message: 'Please input the consignee name!' }]}>

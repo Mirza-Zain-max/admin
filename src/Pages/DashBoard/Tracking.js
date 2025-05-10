@@ -27,6 +27,10 @@ const TrackShipment = () => {
                     const shipperList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setShipper(shipperList);
                 });
+                const userSnapData  = onSnapshot(collection(fireStore, "shipper"), (snapshot) => {
+                    const shipperList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setShipper(shipperList);
+                });
                 return () => {
                     deliveriesUnsub();
                     ridersUnsub();

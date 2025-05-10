@@ -16,6 +16,8 @@ import AddShipment from '../DashBoard/AddShipment';
 import Dashboard from '../DashBoard/Dashboard';
 import Boking from '../DashBoard/Booking';
 import TrackPDF from '../DashBoard/track-pdf';
+import UserBoking from '../../user/user-booking';
+import UserData from '../../user/user-data';
 // import AdminDashboard from '../Admin/Admin-Dashboard';
 // import Setting from '../Admin/Setting';
 // import User from '../Admin/User';
@@ -33,14 +35,15 @@ const FrontEnd = () => {
         <Route path='/' element={<Dashboard />} />
       <Route element={<PrivateRoutes />}>
         {userRole !== 'admin' && <>
-          <Route path="/add" element={<AddRider />} />
+          {/* <Route path="/add" element={<AddRider />} />
            <Route path='/boking' element={<Boking />} />
           <Route path='/booking' element={<AddShipment />} />
           <Route path="/showData" element={<ShowData />} />
           <Route path="/make-delivery" element={<RunSheet />} />
           <Route path="/track-shipment" element={<TrackShipment />} />
-          <Route path="/view-sheet" element={<ViewSheet />} />
-          <Route path='/track-pdf' element={<TrackPDF />} />
+          <Route path="/view-sheet" element={<ViewSheet />} /> */}
+          <Route path='/user-booking' element={<UserBoking/>} /> 
+          <Route path='/user-data' element={<UserData/>} /> 
         </>
         }
         <Route element={<AdminRoutes />}>

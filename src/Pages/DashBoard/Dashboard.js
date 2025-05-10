@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { Button, Col, Row, Typography } from 'antd'
 import React from 'react'
@@ -17,7 +18,7 @@ const Dashboard = () => {
                             Welcome To Naveed Courier & Cargo Services
                         </h1>
                      <Col span={24} className=' d-flex justify-content-center align-items-center'>
-                     <Button className='fw-bolder mt-2 d-flex justify-content-center align-items-center border-0' onClick={()=>{navigate("/add")}} style={{backgroundColor:"cyan" , color:"black"}}>
+                     <Button className='fw-bolder mt-2 d-flex justify-content-center align-items-center border-0' onClick={()=>{navigate("/user-booking")}} style={{backgroundColor:"cyan" , color:"black"}}>
                        Get Started
                         <ArrowRightOutlined />
                        </Button>

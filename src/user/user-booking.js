@@ -2,11 +2,11 @@
 import { Card, Col, Input, InputNumber, message, Row } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import React, { useEffect, useRef, useState } from "react";
-import {  Container } from "react-bootstrap";
-import { fireStore } from "../../Config/firebase"; // Import Firestore
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { useAuthContext } from "../../Context/Auth";
-import QuotationGenerator from "./pdf-generatoer";
+import { Container } from "react-bootstrap";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { useAuthContext } from "../Context/Auth";
+import QuotationGenerator from "../Pages/DashBoard/pdf-generatoer";
+import { fireStore } from "../Config/firebase";
 const UserBoking = () => {
   const { user } = useAuthContext()
   const [cnError, setCnError] = useState("");
@@ -23,15 +23,65 @@ const UserBoking = () => {
     pieces: "", weight: "", description: ""
   });
 
-  useEffect(() => {
-    fetchCouriers();
-  }, []);
 
-  const fetchCouriers = async () => {
-    const querySnapshot = await getDocs(collection(fireStore, "shipper"));
-    const couriersList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setCouriers(couriersList);
-  };
+
+  // const fetchCouriers = async (userId) => {
+  //   try {
+  //     console.log("Fetching couriers for user ID:", userId);
+
+  //     // Double check Firestore collection and field name
+  //     const q = query(
+  //       collection(fireStore, "User Booking"), // 🔍 Make sure "User Booking" is the correct collection name
+  //       where("Created_By", "==", userId) // 🔍 Make sure "Created_By" is the correct field name
+  //     );
+
+  //     const querySnapshot = await getDocs(q);
+
+  //     if (querySnapshot.empty) {
+  //       console.warn("No bookings found for this user.");
+  //     }
+
+  //     const userList = querySnapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     console.log("Fetched couriers:", userList);
+
+  //     setCouriers(userList);
+  //   } catch (error) {
+  //     console.error("🔥 Firestore fetchCouriers error:", error.message, error);
+  //     message.error("Failed to fetch riders!");
+  //   }
+  // };
+
+  const fetchCouriers = async (userId) => {
+  if (!userId) {
+    console.warn("⛔ fetchCouriers called with undefined userId");
+    return;
+  }
+
+  try {
+    console.log("Fetching couriers for user ID:", userId);
+    const q = query(collection(fireStore, "User Booking"), where("Created_By", "==", userId));
+    const querySnapshot = await getDocs(q);
+    const userList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log("Fetched couriers:", userList);
+    setCouriers(userList);
+  } catch (error) {
+    console.error("🔥 Firestore fetchCouriers error:", error.message, error);
+    message.error("Failed to fetch riders!");
+  }
+};
+
+  useEffect(() => {
+    if (user && user.uid) {
+      fetchCouriers(user.uid);
+    } else {
+      console.warn("⏳ Waiting for user to load...");
+    }
+  }, [user]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +96,7 @@ const UserBoking = () => {
 
     try {
       // Check if CN Number already exists
-      const querySnapshot = await getDocs(collection(fireStore, "shipper"));
+      const querySnapshot = await getDocs(collection(fireStore, "User Booking"));
       const existingCN = querySnapshot.docs.find(doc => doc.data().cnNumber === form.cnNumber);
 
       if (existingCN) {
@@ -55,6 +105,11 @@ const UserBoking = () => {
       } else {
         setCnError(""); // Clear error if valid
       }
+      if (!user || !user.uid) {
+        message.error("User not authenticated. Please login again.");
+        return;
+      }
+
 
       const newCourier = {
         ...form,
@@ -65,7 +120,7 @@ const UserBoking = () => {
 
       console.log("Saving courier:", newCourier);
 
-      await addDoc(collection(fireStore, "shipper"), newCourier);
+      await addDoc(collection(fireStore, "User Booking"), newCourier);
       message.success("Save successfully!");
 
       // Reset form & error
@@ -240,11 +295,11 @@ const UserBoking = () => {
               </Col>
             </Row> */}
 
-            {/* Show Error Message */}
-            {/* {trackingError && <p style={{ color: "red", fontSize: "12px", marginTop: "5px" }}>{trackingError}</p>} */}
+          {/* Show Error Message */}
+          {/* {trackingError && <p style={{ color: "red", fontSize: "12px", marginTop: "5px" }}>{trackingError}</p>} */}
 
-            {/* Show Tracking Data if Found */}
-            {/* {trackingData && (
+          {/* Show Tracking Data if Found */}
+          {/* {trackingData && (
               <Card className="mt-3 p-2">
                 <h6><b>Status:</b> {trackingData.status}</h6>
                 <p><b>Shipper:</b> {trackingData.shipperName}</p>

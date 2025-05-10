@@ -136,7 +136,7 @@ const Login = () => {
             localStorage.setItem('user-login', 'true');
             localStorage.setItem('user-role', 'admin');
             localStorage.setItem('user-uid', 'admin-uid');
-            navigate('/admin/dashboard', { replace: true });
+            navigate('/admin/add', { replace: true });
             window.location.reload();
             return;
         }

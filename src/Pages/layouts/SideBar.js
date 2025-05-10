@@ -125,7 +125,7 @@ function SideBar({ children }) {
 
             if (docSnap.exists() && password === docSnap.data().value) {
                 localStorage.setItem('isAuthorized', 'true');
-                navigate('/booking');
+                navigate('/admin/booking');
             } else {
                 alert('Incorrect password!');
             }
