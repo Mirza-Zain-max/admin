@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from '../Auth/Login';
@@ -14,10 +15,10 @@ import TrackShipment from '../DashBoard/Tracking';
 import AddShipment from '../DashBoard/AddShipment';
 import Dashboard from '../DashBoard/Dashboard';
 import Boking from '../DashBoard/Booking';
-import AdminDashboard from '../Admin/Admin-Dashboard';
-import Setting from '../Admin/Setting';
-import User from '../Admin/User';
-import AllShowData from '../Admin/All-User-Data';
+// import AdminDashboard from '../Admin/Admin-Dashboard';
+// import Setting from '../Admin/Setting';
+// import User from '../Admin/User';
+// import AllShowData from '../Admin/All-User-Data';
 
 const FrontEnd = () => {
   const userRole = localStorage.getItem("user-role");
@@ -31,9 +32,9 @@ const FrontEnd = () => {
         <Route path='/' element={<Dashboard />} />
       <Route element={<PrivateRoutes />}>
         {userRole !== 'admin' && <>
+          <Route path="/add" element={<AddRider />} />
            <Route path='/boking' element={<Boking />} />
           <Route path='/booking' element={<AddShipment />} />
-          <Route path="/add" element={<AddRider />} />
           <Route path="/showData" element={<ShowData />} />
           <Route path="/make-delivery" element={<RunSheet />} />
           <Route path="/track-shipment" element={<TrackShipment />} />
@@ -41,10 +42,13 @@ const FrontEnd = () => {
         </>
         }
         <Route element={<AdminRoutes />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<User />} />
-          <Route path="/admin/settings" element={<Setting />} />
-          <Route path="/admin/allShowData" element={<AllShowData />} />
+          <Route path="/admin/add" element={<AddRider />} />
+          <Route path="/admin/boking" element={<Boking />} />
+          <Route path="/admin/booking" element={<AddShipment />} />
+          <Route path="/admin/showData" element={<ShowData />} />
+          <Route path="/admin/make-delivery" element={<RunSheet />} />
+          <Route path="/admin/track-shipment" element={<TrackShipment />} />
+          <Route path="/admin/view-sheet" element={<ViewSheet />} />
         </Route>
       </Route>
       <Route path="*" element={<div > Page not found </div>} />

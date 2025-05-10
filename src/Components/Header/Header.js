@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Container, Dropdown, Navbar, NavDropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../Context/Auth';

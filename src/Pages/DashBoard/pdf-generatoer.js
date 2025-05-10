@@ -11,34 +11,61 @@ Font.register({
     { src: `${window.location.origin}/arial-font/arial.ttf`, fontWeight: 'normal' },
   ]
 });
+// const styles = StyleSheet.create({
+//   page: { paddingHorizontal: "10px", paddingTop: 8, marginTop: "8px", fontFamily: 'Helvetica' },
+//   container: { border: 1, borderColor: '#000000', marginTop: 8 },
+//   header: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000', padding: 4 },
+//   title: { textAlign: 'center', fontSize: 9, fontFamily: 'Arial', fontWeight: "bold" },
+//   infoRow: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
+//   infoCol: { flex: 1, padding: 4, borderRight: 1, borderColor: '#000000' },
+//   infoCol3: { textAlign: "center" },
+//   infoColLast: { flex: 1, padding: 4 },
+//   infoBox: { width: "100px" },
+//   label: { fontSize: 9, fontFamily: 'Arial', fontWeight: "bold" },
+//   value: { fontSize: 9, flexDirection: "column" },
+//   addressSection: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
+//   addressCol: { flex: 1, padding: 6, borderRight: 1, borderColor: '#000000' },
+//   addressCALL: { alignItems: "flex-end", fontWeight: "bold" },
+//   addressColLast: { flex: 1, padding: 4 },
+//   addressBox: { border: 1, borderColor: '#000000', padding: 2, marginTop: 4 },
+//   detailsRow: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
+//   detailCol: { flex: 1, padding: 3, borderRight: 1, borderColor: '#000000' },
+//   detailColLast: { flex: 1, padding: 5 },
+//   remarks: { padding: 4 },
+//   veiwTitle: { fontSize: 11, border: "1px solid black", textAlign: "center", family: 'Arial', fontWeight: "bold", },
+//   veiwTitl: { fontSize: 9, border: "1px solid black", textAlign: "center", family: 'Arial', fontWeight: "bold" },
+//   veiwText: { fontSize: 7, lineHeight: "12px", padding: 3, textAlign: "justify", border: "1px solid black" },
+//   veiwItlic: { fontSize: "12px", },
+//   terms: { fontSize: 9, textAlign: 'justify', borderColor: '#000000', padding: 4 }
+// });
+
 const styles = StyleSheet.create({
   page: { paddingHorizontal: "10px", paddingTop: 8, marginTop: "8px", fontFamily: 'Helvetica' },
-  container: { border: 1, borderColor: '#000000', marginTop: 8 },
-  header: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000', padding: 4 },
+  container: { borderWidth: 1, borderColor: '#000000', borderStyle: 'solid', marginTop: 8 },
+  header: { flexDirection: 'row', borderBottom: "1px solid", borderColor: '#000000', padding: 4 },
   title: { textAlign: 'center', fontSize: 9, fontFamily: 'Arial', fontWeight: "bold" },
-  infoRow: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
-  infoCol: { flex: 1, padding: 4, borderRight: 1, borderColor: '#000000' },
+  infoRow: { flexDirection: 'row', borderBottom: "1px solid", borderColor: '#000000' },
+  infoCol: { flex: 1, padding: 4, borderRight: "1px solid", borderColor: '#000000' },
   infoCol3: { textAlign: "center" },
   infoColLast: { flex: 1, padding: 4 },
   infoBox: { width: "100px" },
   label: { fontSize: 9, fontFamily: 'Arial', fontWeight: "bold" },
   value: { fontSize: 9, flexDirection: "column" },
-  addressSection: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
-  addressCol: { flex: 1, padding: 6, borderRight: 1, borderColor: '#000000' },
+  addressSection: { flexDirection: 'row', borderBottom: "1px solid", borderColor: '#000000' },
+  addressCol: { flex: 1, padding: 6, borderRight: "1px solid", borderColor: '#000000' },
   addressCALL: { alignItems: "flex-end", fontWeight: "bold" },
   addressColLast: { flex: 1, padding: 4 },
-  addressBox: { border: 1, borderColor: '#000000', padding: 2, marginTop: 4 },
-  detailsRow: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
-  detailCol: { flex: 1, padding: 3, borderRight: 1, borderColor: '#000000' },
+  addressBox: { borderWidth: 1, borderColor: '#000000', borderStyle: 'solid', padding: 2, marginTop: 4 },
+  detailsRow: { flexDirection: 'row', borderBottom: "1px solid", borderColor: '#000000' },
+  detailCol: { flex: 1, padding: 3, borderRight: "1px solid", borderColor: '#000000' },
   detailColLast: { flex: 1, padding: 5 },
   remarks: { padding: 4 },
-  veiwTitle: { fontSize: 11, border: "1px solid black", textAlign: "center", family: 'Arial', fontWeight: "bold", },
+  veiwTitle: { fontSize: 11, border: "1px solid black", textAlign: "center", family: 'Arial', fontWeight: "bold" },
   veiwTitl: { fontSize: 9, border: "1px solid black", textAlign: "center", family: 'Arial', fontWeight: "bold" },
   veiwText: { fontSize: 7, lineHeight: "12px", padding: 3, textAlign: "justify", border: "1px solid black" },
-  veiwItlic: { fontSize: "12px", },
+  veiwItlic: { fontSize: "12px" },
   terms: { fontSize: 9, textAlign: 'justify', borderColor: '#000000', padding: 4 }
 });
-
 const QuotationPDF = ({ form }) => (
   <Document>
     <Page size="A4" style={styles.page}>
@@ -350,7 +377,7 @@ const QuotationGenerator = ({ form, handleAddCourier }) => {
     const doc = <QuotationPDF form={form} />;
     const pdfBlob = await pdf(doc).toBlob();
     const url = URL.createObjectURL(pdfBlob);
-    
+
     const a = document.createElement("a");
     a.href = url;
     a.download = `${form.date}_${form.consignee}.pdf`;
@@ -369,7 +396,7 @@ const QuotationGenerator = ({ form, handleAddCourier }) => {
   return (
     <div>
       {/* Button to Preview PDF */}
-      <Button 
+      <Button
         className="p-3 border-0 text-light"
         style={{ backgroundColor: "#240b36" }}
         onClick={() => {
@@ -384,10 +411,10 @@ const QuotationGenerator = ({ form, handleAddCourier }) => {
       </Button>
 
       {/* Button to Save & Print */}
-      <Button 
-        onClick={generatePDF} 
+      <Button
+        onClick={generatePDF}
         loading={isloading}
-        style={{ backgroundColor: "#333333" }} 
+        style={{ backgroundColor: "#333333" }}
         className="w-auto text-light ms-1 mt-2 p-3"
       >
         Save & Save as Print
