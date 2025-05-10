@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // QuotationPDF.js
 import React, { useState } from 'react';
 import { Page, Text, View, Document, StyleSheet, pdf, Font, Image } from '@react-pdf/renderer';

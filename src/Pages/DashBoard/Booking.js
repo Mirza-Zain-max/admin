@@ -266,15 +266,16 @@
 
 
 /* eslint-disable no-unused-vars */
+import  { useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Input, InputNumber, message, Row, Typography } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import React, { useEffect, useRef, useState } from "react";
 import { Container } from "react-bootstrap";
 import { fireStore } from "../../Config/firebase"; // Import Firestore
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useAuthContext } from "../../Context/Auth";
 import QuotationGenerator from "./pdf-generatoer";
-import QuotationGenerator2 from "./track-pdf";
+import TrackPDF from "./track-pdf"
+
 const Boking = () => {
   const { user } = useAuthContext()
   const { Title } = Typography;
@@ -419,7 +420,7 @@ const Boking = () => {
                  
                   {trackingResult && (
                     <>
-                      <QuotationGenerator2 form={trackingResult} />
+                      <TrackPDF form={trackingResult} />
                     </>
                   )}
                 </Col>

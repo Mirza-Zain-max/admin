@@ -15,6 +15,7 @@ import TrackShipment from '../DashBoard/Tracking';
 import AddShipment from '../DashBoard/AddShipment';
 import Dashboard from '../DashBoard/Dashboard';
 import Boking from '../DashBoard/Booking';
+import TrackPDF from '../DashBoard/track-pdf';
 // import AdminDashboard from '../Admin/Admin-Dashboard';
 // import Setting from '../Admin/Setting';
 // import User from '../Admin/User';
@@ -39,6 +40,7 @@ const FrontEnd = () => {
           <Route path="/make-delivery" element={<RunSheet />} />
           <Route path="/track-shipment" element={<TrackShipment />} />
           <Route path="/view-sheet" element={<ViewSheet />} />
+          <Route path='/track-pdf' element={<TrackPDF />} />
         </>
         }
         <Route element={<AdminRoutes />}>
