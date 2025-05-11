@@ -1,28 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query,  doc, updateDoc, deleteDoc } from 'firebase/firestore';
+/* eslint-disable no-unused-vars */
+import { useEffect, useState } from 'react';
+import { collection, getDocs, query, doc, updateDoc } from 'firebase/firestore';
 import { fireStore } from '../../Config/firebase';
-import { Typography } from 'antd';
-import { Table, Pagination, Dropdown, DropdownButton } from 'react-bootstrap';
-import { UserOutlined } from '@ant-design/icons';
+import { Button, Popconfirm, Typography, Table, Pagination, Row, Col, Modal, Input, Form } from 'antd';
+import { EditFilled, EyeOutlined } from '@ant-design/icons';
+import { Container } from 'react-bootstrap';
 
 const User = () => {
   const { Title } = Typography;
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+  const [form] = Form.useForm();
   const pageSize = 20;
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setLoading(true);
       try {
         const usersCollection = collection(fireStore, 'users');
-        const q = query(usersCollection); // Example query
+        const q = query(usersCollection);
         const userSnapshot = await getDocs(q);
         const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setUsers(userList);
-        setTotalPages(Math.ceil(userList.length / pageSize));
       } catch (error) {
         console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -33,88 +38,112 @@ const User = () => {
     setPage(newPage);
   };
 
-  const handleEdit = (user) => {
-    // Implement your edit functionality here
-    console.log('Edit user:', user);
-  };
 
-  const handleDisable = async (userId) => {
+  const handleToggleDisable = async (userId, currentStatus) => {
     try {
-      const userDoc = doc(fireStore, 'users', userId);
-      await updateDoc(userDoc, { disabled: true });
-      setUsers(users.map(user => user.id === userId ? { ...user, disabled: true } : user));
+      const newStatus = !currentStatus;
+      const userRef = doc(fireStore, 'users', userId);
+      await updateDoc(userRef, { isDisabled: newStatus });
+
+      const updatedUsers = users.map(u =>
+        u.id === userId ? { ...u, isDisabled: newStatus } : u
+      );
+      setUsers(updatedUsers);
     } catch (error) {
-      console.error('Error disabling user:', error);
+      console.error('Error toggling user status:', error);
     }
   };
 
-  const handleEnable = async (userId) => {
-    try {
-      const userDoc = doc(fireStore, 'users', userId);
-      await updateDoc(userDoc, { disabled: false });
-      setUsers(users.map(user => user.id === userId ? { ...user, disabled: false } : user));
-    } catch (error) {
-      console.error('Error enabling user:', error);
-    }
+  const togglePasswordVisibility = (userId) => {
+    setVisiblePasswords(prev => ({ ...prev, [userId]: !prev[userId] }));
   };
 
-  const handleDelete = async (userId) => {
-    try {
-      await deleteDoc(doc(fireStore, 'users', userId));
-      setUsers(users.filter(user => user.id !== userId));
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
+  const columns = [
+    {
+      title: '#',
+      dataIndex: 'index',
+      key: 'index',
+      render: (text, record, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: 'Name',
+      dataIndex: 'fullName',
+      key: 'fullName',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Password',
+      dataIndex: 'password',
+      key: 'password',
+      render: (text, user) => (
+        <>
+          {visiblePasswords[user.id] ? text : '*******'}
+          <Button type="link" onClick={() => togglePasswordVisibility(user.id)}>
+            <EyeOutlined />
+          </Button>
+        </>
+      ),
+    },
+    {
+      title: 'Role',
+      key: 'role',
+      render: () => (
+        <span>
+          👤<b>User</b>
+        </span>
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (text, user) => (
+        <>
+          <Popconfirm
+            title={`Are you sure you want to ${user.isDisabled ? 'enable' : 'disable'} this user?`}
+            onConfirm={() => handleToggleDisable(user.id, user.isDisabled)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type={user.isDisabled ? 'default' : 'primary'}>
+              {user.isDisabled ? 'Enable' : 'Disable'}
+            </Button>
+          </Popconfirm>
+        </>
+      ),
+    },
+  ];
 
   const paginatedUsers = users.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <>
-    <Title>Registered Users</Title>
-    <div className="table-responsive">
-      <Table bordered hover className="text-center align-middle">
-        <thead className="table-primary">
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedUsers.map((user, index) => (
-            <tr key={user.email}>
-              <td>{(page - 1) * pageSize + index + 1}</td>
-              <td>{user.fullName}</td>
-              <td>{user.email}</td>
-              <td><UserOutlined /><b>User</b></td>
-              <td>
-                <DropdownButton id="dropdown-basic-button" title="Actions" size="sm">
-                  <Dropdown.Item onClick={() => handleEdit(user)}>Edit</Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleDisable(user.id)}>Disable</Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleEnable(user.id)}>Enable</Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleDelete(user.id)}>Delete</Dropdown.Item>
-                </DropdownButton>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Pagination className="">
-        {[...Array(totalPages).keys()].map(number => (
-          <Pagination.Item
-            key={number + 1}
-            active={number + 1 === page}
-            onClick={() => handlePageChange(number + 1)}
-          >
-            {number + 1}
-          </Pagination.Item>
-        ))}
-      </Pagination>
-    </div>
-  </>
+      <Container>
+        <Row>
+          <Col span={24}>
+            <Title>Registered Users</Title>
+            <Table
+              bordered
+              loading={loading}
+              dataSource={paginatedUsers}
+              columns={columns}
+              pagination={false}
+              rowKey="id"
+            />
+            <Pagination
+              className="mt-3"
+              current={page}
+              total={users.length}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+            />
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 };
 

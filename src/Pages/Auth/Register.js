@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { Col, Row, Button, Input, Form, message } from 'antd';
@@ -13,38 +14,11 @@ const Register = () => {
     const [state, setState] = useState(initialState);
     const [isProcessing, setIsProcessing] = useState(false);
     const handleChange = e => setState({ ...state, [e.target.name]: e.target.value });
-    // const handleSubmit = e => {
-    //     e.preventDefault();
-    //     let { fullName, email, password, confirmPassword } = state;
-    //     fullName = fullName.trim();
-    //     if (fullName.length < 3) return message.error("Please Enter Your Name Correctly");
-    //     if (password.length < 8) return message.error("Password must be at least 8 characters.");
-    //     if (confirmPassword !== password) return message.error("Passwords do not match.");
-    //     setIsProcessing(true);
-    //     createUserWithEmailAndPassword(auth, email, password)
-    //         .then(async (userCredential) => {
-    //             const user = userCredential.user;
-    //             const userData = { uid: user.uid, fullName, email, password, confirmPassword };
-    //             await setDoc(doc(fireStore, "users", user.uid), {
-    //                 uid: user.uid,
-    //                 email: user.email,
-    //                 role: "User",
-    //                 createdAt: new Date()
-    //             });
-    //             createDocument({ ...userData, uid: user.uid });
-    //             message.success("User registered successfully!");
-    //             navigate("/"); // Redirect to dashboard
-    //         })
-    //         .catch((error) => message.error("Account is already registered"))
-    //         .finally(() => setIsProcessing(false));
 
-    // }
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         let { fullName, email, password, confirmPassword } = state;
         fullName = fullName.trim();
-    
         if (fullName.length < 3) {
             return message.error("Please enter your name correctly.");
         }
@@ -57,31 +31,27 @@ const Register = () => {
         if (confirmPassword !== password) {
             return message.error("Passwords do not match.");
         }
-    
         setIsProcessing(true);
-    
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-    
-            // Store user data in Firestore (excluding password for security)
-            await setDoc(doc(fireStore, "users", user.uid), {
+                await setDoc(doc(fireStore, "users", user.uid), {
                 uid: user.uid,
                 fullName,
                 email,
                 role: "User",
+                password,
                 createdAt: new Date(),
-            });
-    
+            });    
             message.success("User registered successfully!");
-            navigate("/"); // Redirect to dashboard
+            navigate("/"); 
         } catch (error) {
             message.error("Account is already registered or an error occurred.");
         } finally {
             setIsProcessing(false);
         }
     };
-    
+
     const createDocument = async (formData) => {
         try {
             await setDoc(doc(fireStore, "users", formData.uid), formData);
@@ -117,13 +87,13 @@ const Register = () => {
                                     </Form.Item>
                                 </Col>
                                 <Col span={24}>
-                                    <Form.Item label="Password" required>
-                                        <Input.Password placeholder='Enter Your Password' name='password' onChange={handleChange} />
+                                    <Form.Item  label="Password" required>
+                                        <Input.Password autoComplete='password' placeholder='Enter Your Password' name='password' onChange={handleChange} />
                                     </Form.Item>
                                 </Col>
                                 <Col span={24}>
                                     <Form.Item label="Confirm Password" required>
-                                        <Input.Password placeholder='Enter Your Confirm Password' name='confirmPassword' onChange={handleChange} />
+                                        <Input.Password autoComplete='password' placeholder='Enter Your Confirm Password' name='confirmPassword' onChange={handleChange} />
                                     </Form.Item>
                                 </Col>
                                 <Col span={24}>

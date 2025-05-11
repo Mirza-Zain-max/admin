@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Button, Card, Col, Input, message, Row, Typography } from "antd";
 import React, { useState, useEffect } from "react";
 import { Container, Table } from "react-bootstrap";
@@ -9,6 +10,7 @@ const TrackShipment = () => {
     const [deliveries, setDeliveries] = useState([]);
     const [riders, setRiders] = useState([]);
     const [shipper, setShipper] = useState([]);
+    const [booking , setBooking] = useState([])
     const { Title } = Typography;
     const [trackCN, setTrackCN] = useState('');
     const [trackResult, setTrackResult] = useState(null);
@@ -27,14 +29,15 @@ const TrackShipment = () => {
                     const shipperList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setShipper(shipperList);
                 });
-                const userSnapData  = onSnapshot(collection(fireStore, "shipper"), (snapshot) => {
-                    const shipperList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setShipper(shipperList);
+                const userSnapData  = onSnapshot(collection(fireStore, "User Booking"), (snapshot) => {
+                    const bookingList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setBooking(bookingList);
                 });
                 return () => {
                     deliveriesUnsub();
                     ridersUnsub();
                     shipperUnsub();
+                    userSnapData()
                 };
 
             } catch (error) {
@@ -77,14 +80,17 @@ const TrackShipment = () => {
 
         const deliveryResult = deliveries.find(delivery => delivery.cnNumber === trackCN.trim());
         const shipperResult = shipper.find(ship => ship.cnNumber === trackCN.trim());
+        const bookingResult = booking.find(booking =>booking.cnNumber === trackCN.trim() )
 
-        if (deliveryResult || shipperResult) {
+        if (deliveryResult || shipperResult || bookingResult) {
             const statusList = [];
             if (shipperResult?.status) statusList.push(shipperResult.status);
             if (deliveryResult?.status) statusList.push(deliveryResult.status);
+            if (bookingResult?.status) statusList.push(bookingResult.status);
             const combinedResult = {
                 ...(shipperResult || {}),
                 ...(deliveryResult || {}),
+                ...(bookingResult || {}),
                 status: statusList.length > 0 ? statusList.join(" → ") : "Status not available"
             };
 
@@ -137,7 +143,7 @@ const TrackShipment = () => {
                                                     <td className="text-center">{shipment.name || shipment.shipperName}</td>
                                                     <td className="text-center">{shipment.origin}</td>
                                                     <td className="text-center">{shipment.destination}</td>
-                                                    <td className="text-center">{shipment.consignee || shipment.consigneeName}</td>
+                                                    <td className="text-center">{shipment.consignee || shipment.consignee}</td>
                                                     <td className="text-center">{shipment.receiverName}</td>
                                                     <td className="text-center">{shipment.riderName}</td>
                                                     <td className="text-center">
@@ -231,7 +237,7 @@ export default TrackShipment;
 //         if (results.length > 0) {
 //             const trackedDeliveries = results.map(result => {
 //                 const rider = riders.find(r => r.id === result.riderId);
-//                 return { ...result, riderName: rider ? rider.name : "Unknown" };
+//                 return { ...result, riderName: rider ? rider.name : "" };
 //             });
 
 //             setTrackResult(trackedDeliveries);
@@ -298,7 +304,7 @@ export default TrackShipment;
 //                                                     <td className="fs-6 text-center">{""}</td>
 //                                                     <td className="fs-6 text-center">{""}</td>
 //                                                     <td className="text-center">{delivery.cnNumber}</td>
-//                                                     <td className="text-center">{delivery.consigneeName}</td>
+//                                                     <td className="text-center">{delivery.consignee}</td>
 //                                                     <td className="text-center">{delivery.riderName}</td>
 //                                                     <td className="text-center">{delivery.receiverName}</td>
 //                                                     <td className="text-center">{""}</td>
@@ -314,7 +320,7 @@ export default TrackShipment;
 //                                         {trackResult.map((delivery, index) => (
 //                                             <div key={index} className="mobile-table-row">
 //                                                 <p><strong>CN Number:</strong> {delivery.cnNumber}</p>
-//                                                 <p><strong>Consignee Name:</strong> {delivery.consigneeName}</p>
+//                                                 <p><strong>Consignee Name:</strong> {delivery.consignee}</p>
 //                                                 <p><strong>Rider Name:</strong> {delivery.riderName}</p>
 //                                                 <p><strong>Receiver Name:</strong> {delivery.receiverName}</p>
 //                                                 <p><strong>Date:</strong> {delivery.date}</p>

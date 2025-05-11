@@ -49,7 +49,7 @@
 //             const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
 //             const riders = riderQuerySnapshot.docs.map(doc => ({
 //                 id: doc.id,
-//                 name: doc.data().name || "Unknown" // Ensures no undefined values
+//                 name: doc.data().name || "" // Ensures no undefined values
 //             }));
 
 //             // ✅ Fetch shipper collection
@@ -66,7 +66,7 @@
 //             // ✅ Assign rider names to deliveries
 //             const updatedDeliveries = deliveryList.map(delivery => ({
 //                 ...delivery,
-//                 riderName: riderMap.get(delivery.riderId) || "Unknown"
+//                 riderName: riderMap.get(delivery.riderId) || ""
 //             }));
 
 //             // ✅ Combine deliveries & shippers
@@ -126,7 +126,7 @@
 //         form.setFieldsValue({
 //             name: record.receiverName,
 //             date: record.date,
-//             consigneeName: record.consigneeName
+//             consignee: record.consignee
 //         });
 //         setIsModalVisible(true);
 //     };
@@ -214,7 +214,7 @@
 //             key: "riderName",
 //             render: (record) => {
 //                 const rider = riderList.find((r) => r.id === record.riderId);
-//                 return rider ? rider.name : "Unknown";
+//                 return rider ? rider.name : "";
 //             },
 //         },
 //         {
@@ -438,7 +438,7 @@ const AddShipment = () => {
             const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
             const riders = riderQuerySnapshot.docs.map(doc => ({
                 id: doc.id,
-                name: doc.data().name || "Unknown"
+                name: doc.data().name || ""
             }));
 
             const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
@@ -452,7 +452,7 @@ const AddShipment = () => {
 
             const updatedDeliveries = deliveryList.map(delivery => ({
                 ...delivery,
-                riderName: riderMap.get(delivery.riderId) || "Unknown"
+                riderName: riderMap.get(delivery.riderId) || ""
             }));
 
             const combinedData = [...updatedDeliveries, ...shipperList];
@@ -672,12 +672,12 @@ const AddShipment = () => {
                                         key: "riderName",
                                         render: (record) => {
                                             const rider = riderList.find((r) => r.id === record.riderId);
-                                            return rider ? rider.name : "Unknown";
+                                            return rider ? rider.name : "";
                                         },
                                     },
                                     { title: "Shipper Name", dataIndex: "shipperName", key: "shipperName" },
                                     { title: "CN Number", dataIndex: "cnNumber", key: "cnNumber" },
-                                    { title: "Consignee Name", dataIndex: "consigneeName" || "consignee", key: "consignee" },
+                                    { title: "Consignee Name", dataIndex: "consignee" || "consignee", key: "consignee" },
                                     { title: "Date", dataIndex: "date", key: "date" }
                                 ]}
                                 loading={loading}

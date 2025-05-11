@@ -1,20 +1,17 @@
 /* eslint-disable no-unused-vars */
+import { useEffect, useRef, useState } from "react";
 import { Card, Col, Input, InputNumber, message, Row } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import React, { useEffect, useRef, useState } from "react";
 import { Container } from "react-bootstrap";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { useAuthContext } from "../Context/Auth";
 import QuotationGenerator from "../Pages/DashBoard/pdf-generatoer";
 import { fireStore } from "../Config/firebase";
 const UserBoking = () => {
   const { user } = useAuthContext()
   const [cnError, setCnError] = useState("");
-  // const [amount, setAmount] = useState();
   const descriptionRef = useRef(null);
-  // const [trackingNumber, setTrackingNumber] = useState("");
-  // const [trackingData, setTrackingData] = useState(null);
-  // const [trackingError, setTrackingError] = useState("");
+  const [userFullName, setUserFullName] = useState("");
   const amountRef = useRef(null);
   const [couriers, setCouriers] = useState([]);
   const [form, setForm] = useState({
@@ -23,56 +20,20 @@ const UserBoking = () => {
     pieces: "", weight: "", description: ""
   });
 
-
-
-  // const fetchCouriers = async (userId) => {
-  //   try {
-  //     console.log("Fetching couriers for user ID:", userId);
-
-  //     // Double check Firestore collection and field name
-  //     const q = query(
-  //       collection(fireStore, "User Booking"), // 🔍 Make sure "User Booking" is the correct collection name
-  //       where("Created_By", "==", userId) // 🔍 Make sure "Created_By" is the correct field name
-  //     );
-
-  //     const querySnapshot = await getDocs(q);
-
-  //     if (querySnapshot.empty) {
-  //       console.warn("No bookings found for this user.");
-  //     }
-
-  //     const userList = querySnapshot.docs.map((doc) => ({
-  //       id: doc.id,
-  //       ...doc.data(),
-  //     }));
-
-  //     console.log("Fetched couriers:", userList);
-
-  //     setCouriers(userList);
-  //   } catch (error) {
-  //     console.error("🔥 Firestore fetchCouriers error:", error.message, error);
-  //     message.error("Failed to fetch riders!");
-  //   }
-  // };
-
   const fetchCouriers = async (userId) => {
-  if (!userId) {
-    console.warn("⛔ fetchCouriers called with undefined userId");
-    return;
-  }
-
-  try {
-    console.log("Fetching couriers for user ID:", userId);
-    const q = query(collection(fireStore, "User Booking"), where("Created_By", "==", userId));
-    const querySnapshot = await getDocs(q);
-    const userList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log("Fetched couriers:", userList);
-    setCouriers(userList);
-  } catch (error) {
-    console.error("🔥 Firestore fetchCouriers error:", error.message, error);
-    message.error("Failed to fetch riders!");
-  }
-};
+    if (!userId) {
+      console.warn("⛔ fetchCouriers called with undefined userId");
+      return;
+    }
+    try {
+      const q = query(collection(fireStore, "User Booking"), where("Created_By", "==", userId));
+      const querySnapshot = await getDocs(q);
+      const userList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCouriers(userList);
+    } catch (error) {
+      message.error("Failed to fetch riders!");
+    }
+  };
 
   useEffect(() => {
     if (user && user.uid) {
@@ -82,6 +43,24 @@ const UserBoking = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user && user.uid) {
+      fetchCouriers(user.uid);
+      fetchUserFullName(user.uid);
+    }
+  }, [user]);
+
+  const fetchUserFullName = async (uid) => {
+    try {
+      const userRef = doc(fireStore, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        setUserFullName(userSnap.data().fullName || "User");
+      }
+    } catch (error) {
+      console.error("Error fetching user name:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,40 +77,31 @@ const UserBoking = () => {
       // Check if CN Number already exists
       const querySnapshot = await getDocs(collection(fireStore, "User Booking"));
       const existingCN = querySnapshot.docs.find(doc => doc.data().cnNumber === form.cnNumber);
-
       if (existingCN) {
         setCnError("CN Number already exists! Please use a different CN Number.");
         return;
       } else {
-        setCnError(""); // Clear error if valid
+        setCnError("");
       }
       if (!user || !user.uid) {
         message.error("User not authenticated. Please login again.");
         return;
       }
-
-
       const newCourier = {
         ...form,
         createdAt: Date.now(),
         status: "Booked",
-        userId: user.uid,
+        Created_By: user.uid,
       };
-
-      console.log("Saving courier:", newCourier);
-
       await addDoc(collection(fireStore, "User Booking"), newCourier);
       message.success("Save successfully!");
-
-      // Reset form & error
       setForm({
         date: "", cnNumber: "", shipperName: "", trackingId: "", contact: "", consignee: "",
         consigneeAddress: "", consigneeContact: "", origin: "", destination: "",
         pieces: "", weight: "", description: "", amount: ""
       });
       setCnError("");
-
-      fetchCouriers(); // Refresh the list
+      fetchCouriers();
       document.querySelector(`[name="date"]`).focus();
     } catch (error) {
       console.error("Firestore Error:", error);
@@ -142,9 +112,8 @@ const UserBoking = () => {
   const handleKeyPress = (e, nextRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
-
       if (nextRef === "submit") {
-        handleAddCourier(); // ✅ Form ko submit karein
+        handleAddCourier();
       } else if (typeof nextRef === "string") {
         const nextInput = document.querySelector(`[name="${nextRef}"]`);
         if (nextInput) {
@@ -158,6 +127,7 @@ const UserBoking = () => {
   return (
     <main className="auth d-flex justify-content-center align-items-center">
       <Container>
+        <h1 className="text-center text-white mb-4">{userFullName}</h1>
         <Row className="my-3">
           <Col md={24} lg={12}>
             <Card className="border-1 border-black rounded-5" >
@@ -166,27 +136,11 @@ const UserBoking = () => {
                   <label className="fw-bolder w-100 mb-1">Date:</label>
                   <Input type="date" className="" name="date" value={form.date} onChange={handleChange} onKeyDown={(e) => handleKeyPress(e, "cnNumber")} />
                 </Col>
-                {/* <Col xs={24} md={24} lg={12} className="px-2 py-1">
-                  <label className="mb-1 fw-bolder">CN Number:</label>
-                  <Input
-                    type="number"
-                    name="cnNumber"
-                    value={form.cnNumber}
-                    onChange={handleChange}
-                    onKeyDown={(e) => handleKeyPress(e, "shipperName")}
-                  />                </Col> */}
                 <Col xs={24} md={24} lg={12} className="px-2 py-1">
                   <label className="mb-1 fw-bolder">CN Number:</label>
-                  <Input
-                    type="number"
-                    name="cnNumber"
-                    value={form.cnNumber}
-                    onChange={handleChange}
-                    onKeyDown={(e) => handleKeyPress(e, "shipperName")}
-                  />
+                  <Input type="number" name="cnNumber" value={form.cnNumber} onChange={handleChange} onKeyDown={(e) => handleKeyPress(e, "shipperName")} />
                   {cnError && <p style={{ color: "red", fontSize: "12px", marginTop: "5px" }}>{cnError}</p>}
                 </Col>
-
               </Row>
               <Col span={24} className="px-2 py-1">
                 <label className="mb-1 fw-bolder">Shipper:</label>
@@ -202,7 +156,6 @@ const UserBoking = () => {
               </Col>
             </Card>
           </Col>
-
           <Col lg={12}>
             <Card className="border-1 overflow-auto flex-wrap border-black rounded-5">
               <Row>
@@ -234,82 +187,29 @@ const UserBoking = () => {
                 </Col>
                 <Col xs={24} md={6} lg={4}>
                   <label className="mb-1 fw-bolder">Weight:</label>
-                  <Input
-                    type="number"
-                    name="weight"
-                    value={form.weight}
-                    onChange={handleChange}
-                    onKeyDown={(e) => handleKeyPress(e, descriptionRef)}
-                  />
+                  <Input type="number" name="weight" value={form.weight} onChange={handleChange} onKeyDown={(e) => handleKeyPress(e, descriptionRef)} />
                 </Col>
                 <Col xs={24} md={12} lg={5}>
                   <label className="mb-1 fw-bolder">Description:</label>
-                  <Input
-                    type="text"
-                    name="description"
-                    ref={descriptionRef}
-                    value={form.description}
-                    onChange={handleChange}
-                    onKeyDown={(e) => handleKeyPress(e, amountRef)}
-                  />
+                  <Input type="text" name="description" ref={descriptionRef} value={form.description} onChange={handleChange} onKeyDown={(e) => handleKeyPress(e, amountRef)} />
                 </Col>
                 <Col xs={24} md={12} lg={5}>
                   <label className="mb-1 fw-bolder">Amount (RS):</label>
                   <div tabIndex={0} onKeyDown={(e) => handleKeyPress(e, "submit")}>
-                    <InputNumber
-                      name="amount"
-                      ref={amountRef}
-                      formatter={(value) => `RS: ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "/-"}
-                      parser={(value) => value.replace(/RS:\s?|,|\/-/g, "")}
-                      value={form.amount}
-                      onKeyDown={(e) => handleKeyPress(e, "submit")}
-                      onChange={(value) => setForm({ ...form, amount: value })}
-                      className="w-100"
-                    />
+                    <InputNumber name="amount" ref={amountRef} formatter={(value) => `RS: ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "/-"} parser={(value) => value.replace(/RS:\s?|,|\/-/g, "")} value={form.amount} onKeyDown={(e) => handleKeyPress(e, "submit")} onChange={(value) => setForm({ ...form, amount: value })} className="w-100" />
                   </div>
+                </Col>
+                <Col xs={24} md={12} lg={5}>
+                  <input type="hidden" name="created_by_name" value={userFullName} />
                 </Col>
               </Row>
               <Row className="d-flex justify-content-center align-items-center">
-                {/* <Col span={10}>
-                  <Button variant="primary" className="w-75 mt-2 p-1 fs-6" onClick={handleAddCourier}>Save Data</Button>
-                </Col> */}
                 <Col span={10}>
                   <QuotationGenerator form={form} handleAddCourier={handleAddCourier} />
                 </Col>
               </Row>
             </Card>
           </Col>
-          {/* <Card className="border-1 border-black rounded-5 p-3">
-            <h5 className="fw-bold">Track Your Shipment</h5>
-            <Row>
-              <Col xs={18}>
-                <Input
-                  type="text"
-                  placeholder="Enter CN Number"
-                  value={trackingNumber}
-                  onChange={(e) => setTrackingNumber(e.target.value)}
-                />
-              </Col>
-              <Col xs={6}>
-                <Button variant="primary" onClick={handleTrackCourier}>Track</Button>
-              </Col>
-            </Row> */}
-
-          {/* Show Error Message */}
-          {/* {trackingError && <p style={{ color: "red", fontSize: "12px", marginTop: "5px" }}>{trackingError}</p>} */}
-
-          {/* Show Tracking Data if Found */}
-          {/* {trackingData && (
-              <Card className="mt-3 p-2">
-                <h6><b>Status:</b> {trackingData.status}</h6>
-                <p><b>Shipper:</b> {trackingData.shipperName}</p>
-                <p><b>Consignee:</b> {trackingData.consignee}</p>
-                <p><b>Destination:</b> {trackingData.destination}</p>
-                <p><b>Amount:</b> RS {trackingData.amount}/-</p>
-              </Card>
-            )}
-          </Card> */}
-
         </Row>
       </Container>
     </main >

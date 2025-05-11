@@ -236,11 +236,11 @@ export default ViewSheet;
 //       const secondItem = deliverySheetData[i + 1] || {};
 //       bodyData.push([
 //         i + 1,
-//         `${firstItem.cnNumber}\n${firstItem.consignee || firstItem.consigneeName}`,
+//         `${firstItem.cnNumber}\n${firstItem.consignee || firstItem.consignee}`,
 //         '',
 //         '',
 //         i + 2,
-//         `${secondItem.cnNumber || ''}\n${secondItem.consignee || secondItem.consigneeName}`,
+//         `${secondItem.cnNumber || ''}\n${secondItem.consignee || secondItem.consignee}`,
 //         '',
 //         firstItem.date,
 //       ]);

@@ -15,9 +15,10 @@ import TrackShipment from '../DashBoard/Tracking';
 import AddShipment from '../DashBoard/AddShipment';
 import Dashboard from '../DashBoard/Dashboard';
 import Boking from '../DashBoard/Booking';
-import TrackPDF from '../DashBoard/track-pdf';
 import UserBoking from '../../user/user-booking';
 import UserData from '../../user/user-data';
+import User from '../Admin/User';
+import AdminShowData from '../DashBoard/admin-data';
 // import AdminDashboard from '../Admin/Admin-Dashboard';
 // import Setting from '../Admin/Setting';
 // import User from '../Admin/User';
@@ -40,8 +41,8 @@ const FrontEnd = () => {
           <Route path='/booking' element={<AddShipment />} />
           <Route path="/showData" element={<ShowData />} />
           <Route path="/make-delivery" element={<RunSheet />} />
-          <Route path="/track-shipment" element={<TrackShipment />} />
           <Route path="/view-sheet" element={<ViewSheet />} /> */}
+          {/* <Route path="/track-shipment" element={<TrackShipment />} /> */}
           <Route path='/user-booking' element={<UserBoking/>} /> 
           <Route path='/user-data' element={<UserData/>} /> 
         </>
@@ -54,6 +55,8 @@ const FrontEnd = () => {
           <Route path="/admin/make-delivery" element={<RunSheet />} />
           <Route path="/admin/track-shipment" element={<TrackShipment />} />
           <Route path="/admin/view-sheet" element={<ViewSheet />} />
+          <Route path="/admin/user" element={<User />} />
+          <Route path='/admin/admin-data' element={<AdminShowData/>} /> 
         </Route>
       </Route>
       <Route path="*" element={<div > Page not found </div>} />

@@ -143,7 +143,7 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log('User logged in via Firebase:', user);
+                // console.log('User logged in via Firebase:', user);
                 await readProfile(user);
             } else {
                 // Handle local admin login
@@ -172,7 +172,7 @@ const AuthProvider = ({ children }) => {
         signOut(auth)
             .then(() => {
                 message.success('Logout successful');
-                navigate("/auth/register");
+                navigate("/auth/login");
                 localStorage.clear();
             })
             .catch(() => {

@@ -6,8 +6,9 @@ import { fireStore } from "../../Config/firebase";
 import { DeleteFilled, EditFilled } from "@ant-design/icons";
 import { Container } from "react-bootstrap";
 
+// const { Option } = Select;
 
-const ShowData = () => {
+const AdminShowData = () => {
     const { Title } = Typography;
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -22,116 +23,44 @@ const ShowData = () => {
     const [editingRecord, setEditingRecord] = useState(null)
     const [form] = Form.useForm();
     const inputRefs = useRef([]);
-    const [companySearch, setCompanySearch] = useState('');
 
     useEffect(() => {
         fetchDeliveries();
     }, []);
 
-    // const fetchDeliveries = async () => {
-    //     setLoading(true);
-    //     try {
-    //         const deliveryQuery = query(collection(fireStore, "deliveries"), orderBy("createdAt"));
-    //         const querySnapshot = await getDocs(deliveryQuery);
-    //         const deliveryList = querySnapshot.docs.map(doc => ({
-    //             id: doc.id,
-    //             source: "deliveries",
-    //             createdAt: doc.data().createdAt || "",
-    //             ...doc.data()
-    //         }));
-    //         const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
-    //         const riders = riderQuerySnapshot.docs.map(doc => ({
-    //             id: doc.id,
-    //             name: doc.data().name || ""
-    //         }));
-    //         const userSnapshot = await getDocs(collection(fireStore, "User Booking"));
-    //         const usershipperList = userSnapshot.docs.map(doc => ({
-    //             id: doc.id,
-    //             source: "User Booking",
-    //             ...doc.data()
-    //         }));
-    //         const riderMap = new Map(riders.map(rider => [rider.id, rider.name]));
-    //         const updatedDeliveries = deliveryList.map(delivery => ({
-    //             ...delivery,
-    //             riderName: riderMap.get(delivery.riderId) || ""
-    //         }));
-    //         const combinedData = [...updatedDeliveries,  ...usershipperList];
-    //         setData(combinedData);
-    //         setFilteredData(combinedData);
-    //         setRiderList(riders);
-    //     } catch (error) {
-    //         console.error("Error fetching deliveries:", error);
-    //     }
-    //     setLoading(false);
-    // };
     const fetchDeliveries = async () => {
         setLoading(true);
         try {
-            // 🔹 Fetch deliveries
             const deliveryQuery = query(collection(fireStore, "deliveries"), orderBy("createdAt"));
-            const deliverySnapshot = await getDocs(deliveryQuery);
-            const deliveryList = deliverySnapshot.docs.map(doc => ({
+            const querySnapshot = await getDocs(deliveryQuery);
+            const deliveryList = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 source: "deliveries",
                 createdAt: doc.data().createdAt || "",
                 ...doc.data()
             }));
-
-            // 🔹 Fetch riders
-            const riderSnapshot = await getDocs(collection(fireStore, "riders"));
-            const riders = riderSnapshot.docs.map(doc => ({
+            const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
+            const riders = riderQuerySnapshot.docs.map(doc => ({
                 id: doc.id,
                 name: doc.data().name || ""
             }));
-
-            // 🔹 Fetch User Bookings
-            const userBookingSnapshot = await getDocs(collection(fireStore, "User Booking"));
-            const usershipperList = userBookingSnapshot.docs.map(doc => ({
+            const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
+            const shipperList = shipperSnapshot.docs.map(doc => ({
                 id: doc.id,
-                source: "User Booking",
+                source: "shipper",
                 ...doc.data()
             }));
-
-            // 🔹 Map riderId to name
             const riderMap = new Map(riders.map(rider => [rider.id, rider.name]));
-
-            // 🔹 Collect unique Created_By user IDs from both collections
-            const createdByIds = new Set();
-            deliveryList.forEach(item => item.Created_By && createdByIds.add(item.Created_By));
-            usershipperList.forEach(item => item.Created_By && createdByIds.add(item.Created_By));
-
-            // 🔹 Fetch user names
-            const userNameMap = new Map();
-            for (const uid of createdByIds) {
-                const userRef = doc(fireStore, "users", uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    userNameMap.set(uid, userSnap.data().fullName || "Unknown User");
-                }
-            }
-
-            // 🔹 Enrich deliveries with riderName and fullName
             const updatedDeliveries = deliveryList.map(delivery => ({
                 ...delivery,
-                riderName: riderMap.get(delivery.riderId) || "",
-                createdByName: userNameMap.get(delivery.Created_By) || ""
+                riderName: riderMap.get(delivery.riderId) || ""
             }));
-
-            // 🔹 Enrich user bookings with fullName
-            const updatedUserBookings = usershipperList.map(booking => ({
-                ...booking,
-                riderName: "", // No rider
-                createdByName: userNameMap.get(booking.Created_By) || ""
-            }));
-
-            // 🔹 Combine all
-            const combinedData = [...updatedDeliveries, ...updatedUserBookings];
+            const combinedData = [...updatedDeliveries, ...shipperList];
             setData(combinedData);
             setFilteredData(combinedData);
             setRiderList(riders);
         } catch (error) {
             console.error("Error fetching deliveries:", error);
-            message.error("Failed to fetch data");
         }
         setLoading(false);
     };
@@ -155,37 +84,12 @@ const ShowData = () => {
         }
         setFilteredData(filtered);
     };
-
-    const updateOnlyconsignee = async (id, newConsigneeValue) => {
-        try {
-            const deliveryRef = doc(fireStore, "deliveries", id);
-            const shipperRef = doc(fireStore, "shipper", id);
-            const userRef = doc(fireStore, "User Booking", id);
-            const deliverySnap = await getDoc(deliveryRef);
-            const shipperSnap = await getDoc(shipperRef);
-            const userSnap = await getDoc(userRef);
-            const updateData = { consignee: newConsigneeValue || "N/A" };
-            if (deliverySnap.exists()) {
-                await updateDoc(deliveryRef, updateData);
-            }
-            if (shipperSnap.exists()) {
-                await updateDoc(shipperRef, updateData);
-            }
-            if (userSnap.exists()) {
-                await updateDoc(userRef, updateData);
-            }
-            message.success("Consignee updated successfully!");
-        } catch (error) {
-            console.error("❌ Error during Consignee Update:", error);
-            message.error("Failed to update consignee!");
-        }
-    };
-
     const handleEdit = (record) => {
-        if (!record) return;
         setEditingRecord(record);
         form.setFieldsValue({
-            consignee: record.consignee || "",
+            name: record.receiverName,
+            date: record.date,
+            consignee: record.consignee
         });
         setIsModalVisible(true);
     };
@@ -227,6 +131,7 @@ const ShowData = () => {
     };
 
     const handleReciverChange = (e, cnNumber) => { const { value } = e.target; setNewReceiver((prev) => ({ ...prev, [cnNumber]: value })) };
+
     const handleSaveReceiver = async () => {
         try {
             const batch = writeBatch(fireStore);
@@ -234,79 +139,78 @@ const ShowData = () => {
 
             const deliveryRefs = filteredData.map(item => doc(fireStore, "deliveries", item.id));
             const shipperRefs = filteredData.map(item => doc(fireStore, "shipper", item.id));
-            const userRefs = filteredData.map(item => doc(fireStore, "User Booking", item.id));
             const deliverySnaps = await Promise.all(deliveryRefs.map(ref => getDoc(ref)));
             const shipperSnaps = await Promise.all(shipperRefs.map(ref => getDoc(ref)));
-            const usershipperSnaps = await Promise.all(userRefs.map(ref => getDoc(ref)));
             for (let i = 0; i < filteredData.length; i++) {
                 const item = filteredData[i];
-                const cn = String(item.cnNumber);
-                if (!cn) {
-                    console.warn("⛔ Missing cnNumber in item:", item);
-                    continue;
-                }
-                if (newReceiver[cn]) {
+                if (newReceiver[item.cnNumber]) {
                     const deliverySnap = deliverySnaps[i];
                     const shipperSnap = shipperSnaps[i];
-                    const userSnap = usershipperSnaps[i];
-                    if (!deliverySnap.exists() && !shipperSnap.exists() && !userSnap.exists()) {
-                        console.warn(`⚠️ Document with ID ${item.id} does not exist in any collection!`);
+                    if (!deliverySnap.exists() && !shipperSnap.exists()) {
+                        console.warn(`Document with ID ${item.id} does not exist in either collection!`);
                         continue;
                     }
                     if (deliverySnap.exists()) {
                         batch.update(deliveryRefs[i], {
-                            receiverName: newReceiver[cn],
-                            consignee: newReceiver[cn],
+                            receiverName: newReceiver[item.cnNumber],
                             status: "Delivered"
                         });
                     }
                     if (shipperSnap.exists()) {
                         batch.update(shipperRefs[i], {
-                            receiverName: newReceiver[cn],
-                            consignee: newReceiver[cn],
-                            status: "Delivered"
-                        });
-                    }
-                    if (userSnap.exists()) {
-                        batch.update(userRefs[i], {
-                            receiverName: newReceiver[cn],
-                            consignee: newReceiver[cn],
+                            receiverName: newReceiver[item.cnNumber],
                             status: "Delivered"
                         });
                     }
                     hasUpdates = true;
-                } else {
-                    console.warn("❌ No receiver data found for CN:", cn);
                 }
             }
-
             if (hasUpdates) {
                 await batch.commit();
-                message.success("✅ Updates saved successfully");
+                message.success("updated saved successfully");
             } else {
-                message.warning("⚠️ No valid records found to update!");
+                message.warning("No valid records found to update!");
             }
         } catch (error) {
-            console.error("🔥 Error saving receiver names:", error);
-            message.error("❌ Failed to save receiver names!");
+            console.error("Error saving receiver names: ", error);
+            message.error("Failed to save receiver names!");
         }
     };
-
     const handleModalOk = async () => {
         try {
             const values = await form.validateFields();
+            // console.log("Form Values:", values); 
+
             if (!editingRecord || !editingRecord.id) {
                 message.error("No record selected for updating!");
                 return;
             }
-            await updateOnlyconsignee(editingRecord.id, values.consignee);
+
+            const updateData = {
+                consignee: values.consignee || "N/A",
+            };
+            // console.log("Updating Firestore with:", updateData);
+            const deliveryRef = doc(fireStore, "deliveries", editingRecord.id);
+            const shipperRef = doc(fireStore, "shipper", editingRecord.id);
+            const deliveryDocSnap = await getDoc(deliveryRef);
+            const shipperDocSnap = await getDoc(shipperRef);
+            if (!deliveryDocSnap.exists() && !shipperDocSnap.exists()) {
+                message.error("Record does not exist!");
+                return;
+            }
+            const updatePromises = [];
+            if (deliveryDocSnap.exists()) updatePromises.push(updateDoc(deliveryRef, updateData));
+            if (shipperDocSnap.exists()) updatePromises.push(updateDoc(shipperRef, updateData));
+            await Promise.all(updatePromises);
             await fetchDeliveries();
-            form.resetFields();
             setIsModalVisible(false);
+            message.success("Record updated successfully!");
         } catch (error) {
-            message.error("Failed to update consignee name!");
+            console.error("Error updating record: ", error);
+            message.error("Failed to update record!");
         }
     };
+
     const onSearch = (value) => {
         let filtered = [...data];
         if (value) {
@@ -319,20 +223,15 @@ const ShowData = () => {
 
     const handleSearchClick = () => {
         let filtered = [...data];
-
         if (searchValue) {
             filtered = filtered.filter((delivery) =>
                 delivery.cnNumber?.toString().toLowerCase().includes(searchValue.toLowerCase())
             );
+            setFilteredData(filtered);
         }
-
-        if (companySearch) {
-            filtered = filtered.filter((delivery) =>
-                delivery.createdByName?.toLowerCase().includes(companySearch.toLowerCase())
-            );
+        else {
+            setFilteredData(data);
         }
-
-        setFilteredData(filtered);
     };
 
     const handleSearchChange = (e) => {
@@ -343,18 +242,12 @@ const ShowData = () => {
         }
     };
 
-
     const handleModalCancel = () => { setIsModalVisible(false) };
     const columns = [
         {
             title: "#",
             key: "index",
             render: (_, __, index) => index + 1,
-        },
-        {
-            title: "Company Name",
-            key: "createdByName",
-            dataIndex: "createdByName"
         },
         {
             title: "Rider Name",
@@ -369,6 +262,7 @@ const ShowData = () => {
             dataIndex: ["shipperName" || "shipper"],
             key: "shipperName"
         },
+
         {
             title: "CN Number",
             dataIndex: "cnNumber",
@@ -378,7 +272,6 @@ const ShowData = () => {
             title: "Consignee Name",
             dataIndex: "consignee",
             key: "consignee",
-
         },
         {
             title: "Receiver Name",
@@ -404,7 +297,7 @@ const ShowData = () => {
             key: "actions",
             render: (_, record) => (
                 <>
-                    <Button className="bg-success text-light rounded-pill border-0" onClick={() => handleEdit(record)}>
+                    <Button className="bg-success text-light" onClick={() => handleEdit(record)}>
                         <EditFilled />
                     </Button>
                     <Popconfirm
@@ -413,7 +306,7 @@ const ShowData = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="bg-danger  text-light rounded-pill border-0" danger>
+                        <Button className="bg-danger  text-light" danger>
                             <DeleteFilled />
                         </Button>
                     </Popconfirm>
@@ -425,10 +318,10 @@ const ShowData = () => {
     return (
         <main className="auth">
             <Container className="my-3" >
-                <span level={1} className="text  d-flex justify-content-center align-items-center display-3 fw-medium text-light mt-3 ">Show Data</span>
                 <Row>
                     <Col span={24} className="mt-5">
-                        <Card className="border-0 card2  ">
+                        <Title level={1} className="text-light"> Show Data</Title>
+                        <Card className="border-1 mt-5 border-black">
                             <Card className="border-0">
                                 <Row>
                                     <Col span={12}>
@@ -450,43 +343,23 @@ const ShowData = () => {
 
                                     </Col>
                                     <Col span={12}>
-                                        <DatePicker className="border-1 w-75 border-bottom " placeholder="Select Date" onChange={setSelectedDate} />
-                                        <Button className="ms-2  text-light rounded-pill border-0" style={{ backgroundColor: "#3E5151" }} onClick={applyFilters}>Apply Filters</Button>
+                                        <DatePicker className="border-1 w-75 border-black" placeholder="Select Date" onChange={setSelectedDate} />
+                                        <Button className="ms-2 bg-black text-light" onClick={applyFilters}>Apply Filters</Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Input
-                                            className="border-1 w-75 border-bottom"
-                                            placeholder="Enter Company Name"
-                                            value={companySearch}
-                                            onChange={(e) => setCompanySearch(e.target.value)}
-                                            allowClear
-                                        />
-                                    </Col>
-
-                                    <Col span={12} className="mt-3">
-                                        <Input className="border-1 w-75 border-bottom " placeholder="Enter CN Number" value={searchValue} onChange={handleSearchChange} allowClear />
-                                        <Button style={{ backgroundColor: "grayText" }} className="ms-2 text-light rounded-pill border-0" onClick={handleSearchClick}>
+                                        <Input className="border-1 w-75 border-black" placeholder="Enter CN Number" value={searchValue} onChange={handleSearchChange} allowClear />
+                                        <Button type="primary" className="ms-2" onClick={handleSearchClick}>
                                             Search
                                         </Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Button className=" bg-success text-light ms-2 rounded-pill border-0" onClick={handleSaveReceiver}>
+                                        <Button className=" bg-success text-light ms-2" onClick={handleSaveReceiver}>
                                             Save  Names
-                                        </Button>
-                                        <Button
-                                            onClick={() => {
-                                                setFilteredData(data);
-                                                setSearchValue("");
-                                                setSelectedDate(null);
-                                            }}
-                                            className="ms-5"
-                                        >
-                                            Reset
                                         </Button>
                                     </Col>
                                 </Row>
                             </Card>
-                            <Table bordered className="  "
+                            <Table bordered className="border-black border-1  "
                                 dataSource={filteredData.map((item, index) => ({ ...item, key: item.id || index }))}
                                 columns={columns}
                                 loading={loading}
@@ -498,22 +371,15 @@ const ShowData = () => {
                                 }}
                                 scroll={{ x: 1000 }}
                             />
-                            <Modal
-                                title="Edit Consignee Name"
-                                open={isModalVisible}
-                                onOk={handleModalOk}
-                                onCancel={handleModalCancel}
-                            >
+
+                            <Modal title="Edit Record" visible={isModalVisible} onOk={handleModalOk} onCancel={handleModalCancel}>
                                 <Form form={form} layout="vertical">
-                                    <Form.Item
-                                        name="consignee"
-                                        label="Consignee Name"
-                                        rules={[{ required: true, message: 'Please input the consignee name!' }]}
-                                    >
-                                        <Input placeholder="Enter Consignee Name" />
+                                    <Form.Item name="consignee" label="Consignee Name" rules={[{ required: true, message: 'Please input the consignee name!' }]}>
+                                        <Input />
                                     </Form.Item>
                                 </Form>
                             </Modal>
+
                         </Card>
                     </Col>
                 </Row>
@@ -523,4 +389,4 @@ const ShowData = () => {
     );
 };
 
-export default ShowData;
+export default AdminShowData;

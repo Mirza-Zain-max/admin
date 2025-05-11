@@ -46,12 +46,12 @@
 //     //         const shipperList = shipperSnapshot.docs.map(doc => ({ id: doc.id, source: "shipper", ...doc.data() }));
 
 //     //         // Create a map for fast lookup
-//     //         const riderMap = new Map(riders.map(rider => [rider.id, rider.name || "Unknown"]));
+//     //         const riderMap = new Map(riders.map(rider => [rider.id, rider.name || ""]));
 
 //     //         // Assign rider names to deliveries
 //     //         const updatedDeliveries = deliveryList.map(delivery => ({
 //     //             ...delivery,
-//     //             riderName: riderMap.get(delivery.riderId) || "Unknown",
+//     //             riderName: riderMap.get(delivery.riderId) || "",
 //     //         }));
 
 //     //         // Combine both data sources
@@ -85,7 +85,7 @@
 //             const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
 //             const riders = riderQuerySnapshot.docs.map(doc => ({
 //                 id: doc.id,
-//                 name: doc.data().name || "Unknown" // Ensures no undefined values
+//                 name: doc.data().name || "" // Ensures no undefined values
 //             }));
 
 //             // ✅ Fetch shipper collection
@@ -102,7 +102,7 @@
 //             // ✅ Assign rider names to deliveries
 //             const updatedDeliveries = deliveryList.map(delivery => ({
 //                 ...delivery,
-//                 riderName: riderMap.get(delivery.riderId) || "Unknown"
+//                 riderName: riderMap.get(delivery.riderId) || ""
 //             }));
 
 //             // ✅ Combine deliveries & shippers
@@ -143,7 +143,7 @@
 //         form.setFieldsValue({
 //             name: record.receiverName,
 //             date: record.date,
-//             consigneeName: record.consigneeName
+//             consignee: record.consignee
 //         });
 //         setIsModalVisible(true);
 //     };
@@ -255,7 +255,7 @@
 //             const updateData = {
 //                 receiverName: values.name || "N/A",
 //                 shipperName: values.shipper || "",
-//                 consigneeName: values.consignee || "N/A", // Ensure it's present
+//                 consignee: values.consignee || "N/A", // Ensure it's present
 //             };
 
 //             console.log("Updating Firestore with:", updateData); // Debugging
@@ -331,7 +331,7 @@
 //             key: "riderName",
 //             render: (record) => {
 //                 const rider = riderList.find((r) => r.id === record.riderId);
-//                 return rider ? rider.name : "Unknown";
+//                 return rider ? rider.name : "";
 //             },
 //         },
 //         {
@@ -522,7 +522,7 @@ const AllShowData = () => {
             const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
             const riders = riderQuerySnapshot.docs.map(doc => ({
                 id: doc.id,
-                name: doc.data().name || "Unknown"
+                name: doc.data().name || ""
             }));
 
             const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
@@ -536,7 +536,7 @@ const AllShowData = () => {
 
             const updatedDeliveries = deliveryList.map(delivery => ({
                 ...delivery,
-                riderName: riderMap.get(delivery.riderId) || "Unknown"
+                riderName: riderMap.get(delivery.riderId) || ""
             }));
 
             const combinedData = [...updatedDeliveries, ...shipperList];
@@ -567,7 +567,7 @@ const AllShowData = () => {
         form.setFieldsValue({
             name: record.receiverName,
             date: record.date,
-            consigneeName: record.consigneeName
+            consignee: record.consignee
         });
         setIsModalVisible(true);
     };
@@ -682,7 +682,7 @@ const AllShowData = () => {
             const updateData = {
                 receiverName: values.name || "N/A",
                 shipperName: values.shipper || "",
-                consigneeName: values.consignee || "N/A",
+                consignee: values.consignee || "N/A",
             };
 
             console.log("Updating Firestore with:", updateData);
@@ -713,6 +713,7 @@ const AllShowData = () => {
         }
     };
 
+    // eslint-disable-next-line no-unused-vars
     const onSearch = (value) => {
         let filtered = [...data];
         if (value) {
@@ -758,7 +759,7 @@ const AllShowData = () => {
             key: "riderName",
             render: (record) => {
                 const rider = riderList.find((r) => r.id === record.riderId);
-                return rider ? rider.name : "Unknown";
+                return rider ? rider.name : "";
             },
         },
         {
