@@ -16,15 +16,9 @@ const Boking = () => {
   const descriptionRef = useRef(null);
   const amountRef = useRef(null);
   const [couriers, setCouriers] = useState([]);
-  const [form, setForm] = useState({
-    cnNumber: "", date: "", shipperName: "", trackingId: "", contact: "", amount: "", consignee: "",
-    consigneeAddress: "", consigneeContact: "", origin: "", destination: "",
-    pieces: "", weight: "", description: ""
-  });
+  const [form, setForm] = useState({ cnNumber: "", date: "", shipperName: "", trackingId: "", contact: "", amount: "", consignee: "", consigneeAddress: "", consigneeContact: "", origin: "", destination: "", pieces: "", weight: "", description: "" });
   const [trackingResult, setTrackingResult] = useState(null);
-  useEffect(() => {
-    fetchCouriers();
-  }, []);
+  useEffect(() => { fetchCouriers(); }, []);
   const fetchCouriers = async () => {
     const querySnapshot = await getDocs(collection(fireStore, "shipper"));
     const couriersList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -37,8 +31,6 @@ const Boking = () => {
       [name]: value,
     }));
   };
-
-
   const handleTrackCourier = async () => {
     try {
       if (!form.cnNumber) {
@@ -67,48 +59,33 @@ const Boking = () => {
 
   const handleAddCourier = async () => {
     const timestamp = new Date().toISOString();
-
     try {
-      // Check if CN Number already exists
       const querySnapshot = await getDocs(collection(fireStore, "shipper"));
       const existingCN = querySnapshot.docs.find(doc => doc.data().cnNumber === form.cnNumber);
-
       if (existingCN) {
         setCnError("CN Number already exists! Please use a different CN Number.");
         return;
       } else {
-        setCnError(""); // Clear error if valid
+        setCnError("");
       }
-
       const newCourier = {
         ...form,
         createdAt: Date.now(),
         status: "Booked",
         userId: user.uid,
       };
-
-      console.log("Saving courier:", newCourier);
-
+      // console.log("Saving courier:", newCourier);
       await addDoc(collection(fireStore, "shipper"), newCourier);
       message.success("Save successfully!");
-
-      // Reset form & error
-      setForm({
-        date: "", cnNumber: "", shipperName: "", trackingId: "", contact: "", consignee: "",
-        consigneeAddress: "", consigneeContact: "", origin: "", destination: "",
-        pieces: "", weight: "", description: "", amount: ""
-      });
+      setForm({ date: "", cnNumber: "", shipperName: "", trackingId: "", contact: "", consignee: "", consigneeAddress: "", consigneeContact: "", origin: "", destination: "", pieces: "", weight: "", description: "", amount: "" });
       setCnError("");
-
-      fetchCouriers(); // Refresh the list
+      fetchCouriers();
       document.querySelector(`[name="date"]`).focus();
     } catch (error) {
       console.error("Firestore Error:", error);
       message.error("Error adding : " + error.message);
     }
   };
-
-
 
   const handleKeyPress = (e, nextRef) => {
     if (e.key === "Enter") {
@@ -139,25 +116,11 @@ const Boking = () => {
                 </Col>
                 <Col xs={24} md={24} lg={12} className="px-2 py-1">
                   <label className="fw-bolder w-100 mb-1">CN Number:</label>
-                  <Input
-                    type="number"
-                    name="cnNumber"
-                    value={form.cnNumber}
-                    onChange={handleChange}
-                    onKeyDown={(e) => handleKeyPress(e, "shipperName")}
-                    placeholder="Enter CN Number"
-                  />
+                  <Input type="number" name="cnNumber" value={form.cnNumber} onChange={handleChange} onKeyDown={(e) => handleKeyPress(e, "shipperName")} placeholder="Enter CN Number" />
                   <Col>
                     <Button className="  rounded-pill border-0 text-light mt-2" style={{ backgroundColor: "#302b63" }} onClick={handleTrackCourier}>Track CN</Button>
                   </Col>
-
-                  {trackingResult && (
-                    <>
-                      <TrackPDF form={trackingResult} />
-                    </>
-                  )}
-                </Col>
-                <Col>
+                  {trackingResult && (<TrackPDF form={trackingResult} />)}
                 </Col>
               </Row>
               <Col span={24} className="px-2 py-1">

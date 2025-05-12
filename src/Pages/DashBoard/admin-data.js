@@ -23,6 +23,8 @@ const AdminShowData = () => {
     const [editingRecord, setEditingRecord] = useState(null)
     const [form] = Form.useForm();
     const inputRefs = useRef([]);
+    const [isLoading , setIsLoading] = useState()
+    const [isLoading2 , setIsLoading2] = useState()
 
     useEffect(() => {
         fetchDeliveries();
@@ -133,6 +135,7 @@ const AdminShowData = () => {
     const handleReciverChange = (e, cnNumber) => { const { value } = e.target; setNewReceiver((prev) => ({ ...prev, [cnNumber]: value })) };
 
     const handleSaveReceiver = async () => {
+        setIsLoading(true)
         try {
             const batch = writeBatch(fireStore);
             let hasUpdates = false;
@@ -172,20 +175,21 @@ const AdminShowData = () => {
                 message.warning("No valid records found to update!");
             }
         } catch (error) {
-            console.error("Error saving receiver names: ", error);
+            // console.error("Error saving receiver names: ", error);
             message.error("Failed to save receiver names!");
+        }finally{
+            setIsLoading(false)
         }
     };
     const handleModalOk = async () => {
+        setIsLoading2(true)
         try {
             const values = await form.validateFields();
             // console.log("Form Values:", values); 
-
             if (!editingRecord || !editingRecord.id) {
                 message.error("No record selected for updating!");
                 return;
             }
-
             const updateData = {
                 consignee: values.consignee || "N/A",
             };
@@ -208,6 +212,8 @@ const AdminShowData = () => {
         } catch (error) {
             console.error("Error updating record: ", error);
             message.error("Failed to update record!");
+        }finally{
+            setIsLoading2(false)
         }
     };
 
@@ -259,7 +265,7 @@ const AdminShowData = () => {
         },
         {
             title: "Shipper Name",
-            dataIndex: ["shipperName" || "shipper"],
+            dataIndex: "shipperName",
             key: "shipperName"
         },
 
@@ -353,7 +359,7 @@ const AdminShowData = () => {
                                         </Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Button className=" bg-success text-light ms-2" onClick={handleSaveReceiver}>
+                                        <Button loading={isLoading} className=" bg-success text-light ms-2" onClick={handleSaveReceiver}>
                                             Save  Names
                                         </Button>
                                     </Col>

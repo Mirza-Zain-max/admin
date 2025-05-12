@@ -48,7 +48,7 @@ const AddRider = () => {
             message.error("User not authenticated. Please log in.");
             return;
         }
-        
+
         const duplicate = riders.find((rider) => rider.name.toLowerCase() === newRider.name.toLowerCase());
         if (duplicate) {
             message.error("Rider with this name already exists!");
@@ -70,8 +70,6 @@ const AddRider = () => {
             setIsLoading(false)
         }
     };
-
-
     const deleteRider = async () => {
         if (!newRider.name) {
             message.error("Please enter rider name to delete.");
@@ -93,7 +91,7 @@ const AddRider = () => {
         } catch (e) {
             console.error("Error deleting document:", e);
             message.error("Error deleting rider!");
-        }finally{
+        } finally {
             setIsLoading2(false)
         }
     };
@@ -101,18 +99,22 @@ const AddRider = () => {
         <main className="auth d-flex justify-content-center align-items-center">
             <Container >
                 <Row className="d-flex justify-content-center align-items-center">
-                    <Col>
-                        <Card style={{ backgroundColor: "#d6d6d6" }} className="p-4 my-4 border-black">
-                            <Title level={1}>Add Rider</Title>
-                            <label className="fw-bold">Rider Name:</label>
-                            <Input type="text" className="my-2" name="name" value={newRider.name} onChange={handleRiderChange} placeholder="Enter rider name" ref={(ref) => { inputRefs.current[0] = ref; riderNameRef.current = ref }} onKeyDown={(e) => handleKeyPress(e, 0)} />
-                            <label className="fw-bold">Contact Number:</label>
-                            <Input type="number" className="my-2" name="contact" value={newRider.contact} onChange={handleRiderChange} placeholder="Enter contact number" ref={(ref) => inputRefs.current[1] = ref} onKeyDown={(e) => handleKeyPress(e, 1)} />
-                            <label className="fw-bold">Address:</label>
-                            <Input type="text" className="my-2" name="address" value={newRider.address} onChange={handleRiderChange} placeholder="Enter address" ref={(ref) => inputRefs.current[2] = ref} onKeyDown={(e) => handleKeyPress(e, "submit")} />
-                            <Button loading={isLoading} className="me-2 border-0 mt-2" style={{ backgroundColor: "Green", color: "#fff" }} onClick={saveRider}>
-                                Save Rider
-                            </Button>
+                    <Col span={24} className="text-center">
+                        <span className="text-white " style={{ fontSize: 60, fontWeight: 600, fontFamily: "inherit" }}>Add Rider</span>
+                    </Col>
+                    <Col className="d-flex justify-content-center align-items-center">
+                        <Card style={{ backgroundColor: "#fff" }} className="p-4 my-4 card2 border-0">
+                            <label className="fw-bold fs-6">Rider Name:</label>
+                            <Input type="text" className="my-2 rounded-4" name="name" value={newRider.name} onChange={handleRiderChange} placeholder="Enter rider name" ref={(ref) => { inputRefs.current[0] = ref; riderNameRef.current = ref }} onKeyDown={(e) => handleKeyPress(e, 0)} />
+                            <label className="fw-bold fs-6">Contact Number:</label>
+                            <Input type="number" className="my-2 rounded-4" name="contact" value={newRider.contact} onChange={handleRiderChange} placeholder="Enter contact number" ref={(ref) => inputRefs.current[1] = ref} onKeyDown={(e) => handleKeyPress(e, 1)} />
+                            <label className="fw-bold fs-6">Address:</label>
+                            <Input type="text" className="my-2 rounded-4" name="address" value={newRider.address} onChange={handleRiderChange} placeholder="Enter address" ref={(ref) => inputRefs.current[2] = ref} onKeyDown={(e) => handleKeyPress(e, "submit")} />
+                            <div className="d-flex justify-content-center align-items-center">
+                                <Button loading={isLoading} className="me-2 w-50 border-0 p-4 rounded-5 mt-2 fs-4 fw-medium" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={saveRider}>
+                                    Save Rider
+                                </Button>
+                            </div>
                             {/* <Button loading={isLoading2} className="me-2 mt-2 border-0 bg-danger" style={{ color: "#fff" }} onClick={deleteRider}>
                                 Delete Rider
                             </Button> */}

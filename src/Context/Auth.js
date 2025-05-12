@@ -103,7 +103,7 @@ const AuthContext = createContext({
     isAuth: false,
     user: null,
     isAppLoading: true,
-    dispatch: () => {},
+    dispatch: () => { },
     handleLogout: () => {
         message.error("Logout Failed");
         localStorage.clear();
@@ -161,7 +161,10 @@ const AuthProvider = ({ children }) => {
                     setState({ isAuth: false, user: null });
                 }
             }
+            // setTimeout(() => {
+            // }, 6000);
             setIsAppLoading(false);
+
         });
 
         return () => unsubscribe();
