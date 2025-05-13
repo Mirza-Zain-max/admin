@@ -265,7 +265,7 @@ const AdminShowData = () => {
         },
         {
             title: "Shipper Name",
-            dataIndex: "shipperName",
+            dataIndex: ["shipperName" || "shipper"],
             key: "shipperName"
         },
 

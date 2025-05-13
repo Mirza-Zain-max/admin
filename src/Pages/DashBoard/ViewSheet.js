@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Card, Col, Input, Row, Select, Table, Typography, Button, message } from "antd";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -32,7 +33,12 @@ const ViewSheet = () => {
         const shipperQuery = query(collection(fireStore, "shipper"), orderBy('createdAt'));
         const shipperSnapshot = await getDocs(shipperQuery);
         const shipperList = shipperSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setDeliveries([...deliveriesList, ...shipperList]);
+       
+        const userQuery = query(collection(fireStore, "User Booking"), orderBy('createdAt'));
+        const userSnapshot = await getDocs(userQuery);
+        const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setDeliveries([...deliveriesList, ...shipperList , ...userList]);
       } catch (error) {
         message.error("Failed to fetch data");
       }
@@ -117,7 +123,7 @@ const ViewSheet = () => {
   return (
     <main className="auth d-flex justify-content-center align-items-center">
       <Container>
-        <Row className="d-flex justify-content-center align-items-center">
+        <Row className="d-flex justify-content-center my-5 align-items-center">
           <Col span={24} className="text-center">
             <span className="text-white " style={{ fontSize: 60, fontWeight: 600, fontFamily: "inherit" }}>View Delivery Sheet</span>
           </Col>
@@ -150,9 +156,9 @@ const ViewSheet = () => {
               {deliverySheetData.length > 0 ? (
                 <div style={{ textAlign: 'center' }}>
                   <hr />
-                  <h2 className="text-center">{deliverySheetData[0]?.riderName}</h2>
-                  <Table bordered columns={columns} dataSource={indexedDeliverySheetData} rowKey="id" pagination={false} className="text-center border-2 h-auto" />
-                  <Button className="bg-success text-light" onClick={downloadPDFSheet} style={{ marginTop: "1rem" }}>
+                  <h2 className="text-center my-4 text-light ">{deliverySheetData[0]?.riderName}</h2>
+                  <Table bordered scroll={{ x: 1000 }} columns={columns} dataSource={indexedDeliverySheetData} rowKey="id" pagination={false} className="text-center border-2 h-auto" />
+                  <Button className="text-light w-50 p-4 rounded-5" onClick={downloadPDFSheet} style={{ marginTop: "1rem" ,backgroundColor: "#27584a" }}>
                     Download as PDF
                   </Button>
                 </div>
