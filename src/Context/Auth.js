@@ -162,8 +162,8 @@ const AuthProvider = ({ children }) => {
                 }
             }
             // setTimeout(() => {
+                setIsAppLoading(false);
             // }, 6000);
-            setIsAppLoading(false);
 
         });
 

@@ -24,7 +24,7 @@ const Login = () => {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists() && password === docSnap.data().value) {
                 localStorage.setItem('isAuthorized', 'true');
-                navigate('/auth/register`');
+                navigate('/auth/register');
             } else {
                 message.error('Incorrect password!');
             }
