@@ -35,16 +35,16 @@ const Register = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-                await setDoc(doc(fireStore, "users", user.uid), {
+            await setDoc(doc(fireStore, "users", user.uid), {
                 uid: user.uid,
                 fullName,
                 email,
                 role: "User",
                 password,
                 createdAt: new Date(),
-            });    
+            });
             message.success("User registered successfully!");
-            navigate("/"); 
+            navigate("/");
         } catch (error) {
             message.error("Account is already registered or an error occurred.");
         } finally {
@@ -68,47 +68,49 @@ const Register = () => {
         <main className='auth p-3 p-md-4 p-lg-5'>
             <Fade cascade damping={0.1}>
                 <Container>
-                    <div className="card p-3 p-md-4 p-lg-4">
-                        <Form layout="vertical">
-                            <h1 className='mb-4 text-center'>
-                                <i>
-                                    Register
-                                </i>
-                            </h1>
-                            <Row>
-                                <Col span={24}>
-                                    <Form.Item label="FullName" required>
-                                        <Input type='text' placeholder='Enter Your Full Name' name='fullName' onChange={handleChange} />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={24}>
-                                    <Form.Item label="Email" required>
-                                        <Input type='email' placeholder='Enter Your Email' name='email' onChange={handleChange} />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={24}>
-                                    <Form.Item  label="Password" required>
-                                        <Input.Password autoComplete='password' placeholder='Enter Your Password' name='password' onChange={handleChange} />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={24}>
-                                    <Form.Item label="Confirm Password" required>
-                                        <Input.Password autoComplete='password' placeholder='Enter Your Confirm Password' name='confirmPassword' onChange={handleChange} />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={24}>
-                                    <Button type='primary' htmlType='submit' onClick={handleSubmit} className='w-100' loading={isProcessing}>Register</Button>
-                                </Col>
-                                <Col span={12} className='mt-2'>
-                                    <p>
-                                        Already have an account?
-                                    </p>
-                                </Col>
-                                <Col span={12}>
-                                    <Link to='/auth/login' className='mt-2 btn text-center nav-link'>Login</Link>
-                                </Col>
-                            </Row>
-                        </Form>
+                    <div className='card2 rounded-5 '>
+                      <div className="card rounded-5 bg-white p-3 p-md-4 p-lg-4">
+                            <Form layout="vertical">
+                                <h1 className='mb-4 text-center'>
+                                    <i>
+                                        Register
+                                    </i>
+                                </h1>
+                                <Row>
+                                    <Col span={24}>
+                                        <Form.Item label="FullName" required>
+                                            <Input type='text' placeholder='Enter Your Full Name' name='fullName' onChange={handleChange} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={24}>
+                                        <Form.Item label="Email" required>
+                                            <Input type='email' placeholder='Enter Your Email' name='email' onChange={handleChange} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={24}>
+                                        <Form.Item label="Password" required>
+                                            <Input.Password autoComplete='password' placeholder='Enter Your Password' name='password' onChange={handleChange} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={24}>
+                                        <Form.Item label="Confirm Password" required>
+                                            <Input.Password autoComplete='password' placeholder='Enter Your Confirm Password' name='confirmPassword' onChange={handleChange} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={24}>
+                                        <Button htmlType='submit' onClick={handleSubmit} className="border-0 rounded-5 ms-2 w-100 py-4" style={{ backgroundColor: "#007991", color: "#fff", fontSize: 25, fontWeight: 600 }} loading={isProcessing}>Register</Button>
+                                    </Col>
+                                    <Col span={12} className='mt-2'>
+                                        <p>
+                                            Already have an account?
+                                        </p>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Link to='/auth/login' className='mt-2 btn text-center nav-link text-primary fw-bold'>Login</Link>
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </div>
                     </div>
                 </Container>
             </Fade>

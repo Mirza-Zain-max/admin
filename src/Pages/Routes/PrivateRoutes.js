@@ -17,7 +17,7 @@ const PrivateRoutes = () => {
     const { isAuth } = useAuthContext();
     const userRole = localStorage.getItem("user-role");
     const { pathname } = useLocation()
-    return isAuth ? (userRole === 'admin' && pathname === '/') ? <Navigate to="/admin/dashboard" /> : <Outlet /> : <Navigate to="/auth/login" />;
+    return isAuth ? (userRole === 'admin' && pathname === '/') ? <Navigate to="/admin/add" /> : <Outlet /> : <Navigate to="/auth/login" />;
 };
 
 export default PrivateRoutes;

@@ -85,10 +85,7 @@ const UserData = () => {
         {
             title: "Rider Name",
             key: "riderName",
-            render: (record) => {
-                const rider = riderList.find((r) => r.id === record.riderId);
-                return rider ? rider.name : "";
-            },
+            dataIndex: "riderName"
         },
         {
             title: "Shipper Name",
@@ -206,9 +203,11 @@ const UserData = () => {
     return (
         <main className="auth">
             <Container className="my-3">
-                <Typography.Title className="text-center text-light">Show Data</Typography.Title>
-                <Card>
-                    <Card className="border-0 bg-transparent card2 mb-3">
+                <Col span={24} className="text-center">
+                    <span className="text-white " style={{ fontSize: 60, fontWeight: 600, fontFamily: "inherit" }}>Show Data</span>
+                </Col>
+                <Card className="card2 ">
+                    <Card className="border-0 bg-transparent mb-3">
                         <Row gutter={[16, 16]} align="middle">
                             <Col xs={24} md={12}>
                                 <DatePicker className="w-100" placeholder="Select Date" onChange={setSelectedDate} />

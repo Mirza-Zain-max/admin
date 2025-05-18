@@ -22,7 +22,7 @@ function SideBar({ children }) {
 
     const handleOk = async () => {
         try {
-            const docRef = doc(fireStore, 'secureData', 'password'); 
+            const docRef = doc(fireStore, 'secureData', 'password');
             const docSnap = await getDoc(docRef);
             if (docSnap.exists() && password === docSnap.data().value) {
                 localStorage.setItem('isAuthorized', 'true');
@@ -49,7 +49,7 @@ function SideBar({ children }) {
     };
     const handleOk2 = async () => {
         try {
-            const docRef = doc(fireStore, 'secureData', 'password'); 
+            const docRef = doc(fireStore, 'secureData', 'password');
             const docSnap = await getDoc(docRef);
             if (docSnap.exists() && password === docSnap.data().value) {
                 localStorage.setItem('isAuthorized', 'true');
@@ -77,7 +77,7 @@ function SideBar({ children }) {
 
     return (
         <>
-            <Navbar expand="lg" className="bg-dark navbar-dark p-4">
+            <Navbar expand="lg" className="p-4" style={{backgroundColor : "#2f655a"}}>
                 <Container>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
@@ -87,10 +87,13 @@ function SideBar({ children }) {
                             <Link className='text-dark nav-link  text-center fw-bold  my-2 p-1 ' to="/admin/make-delivery"> Make Sheet</Link>
                             <hr />
                             <Link className='text-dark nav-link  text-center fw-bold my-2 p-1 ' to="/admin/view-sheet">View Sheet</Link>
-                            <hr />
+                        </NavDropdown>
+                        <NavDropdown title="Update" className='fw-bold text-light mx-3' id="basic-nav-dropdown">
                             <Link className='text-dark nav-link  text-center fw-bold my-2 p-1 ' to='/admin/admin-data'>Update Sheet</Link>
                             <hr />
                             <Link className='text-dark nav-link  text-center fw-bold my-2 p-1 ' to='/admin/showData'>User Sheet</Link>
+                            <hr />
+                            <Link className='text-dark nav-link  text-center fw-bold my-2 p-1 ' to='/admin/allShowData'>All Data</Link>
                         </NavDropdown>
                         <Link className='text-light nav-link mx-3 fw-bold ' to="/admin/track-shipment">Track Shipment</Link>
                         <NavDropdown title="Account" className='fw-bold text-light  ms-3 flex-wrap ' id="basic-nav-dropdown">
@@ -139,10 +142,10 @@ function SideBar({ children }) {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-           <main>
-            {children}
-           </main>
-            
+            <main>
+                {children}
+            </main>
+
         </>
     );
 }

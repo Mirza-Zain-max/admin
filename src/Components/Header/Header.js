@@ -9,7 +9,7 @@ function Header1() {
 
 
   return (
-    <Navbar expand="lg" className="bg-dark navbar-dark p-4">
+    <Navbar expand="lg" className="p-4" style={{backgroundColor : "#2f655a"}}>
       <Container>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

@@ -397,7 +397,8 @@
 
 // export default AddShipment;
 
-import  { useEffect, useRef, useState } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useEffect, useRef, useState } from "react";
 import { Table, Select, DatePicker, Button, Input, Form, Row, Col, Card, Typography, message, Popconfirm } from "antd";
 import { collection, getDocs, deleteDoc, doc, query, orderBy, getDoc } from "firebase/firestore";
 import { fireStore } from "../../Config/firebase";
@@ -423,50 +424,110 @@ const AddShipment = () => {
         fetchDeliveries();
     }, []);
 
+    // const fetchDeliveries = async () => {
+    //     setLoading(true);
+    //     try {
+    //         const deliveryQuery = query(collection(fireStore, "deliveries"), orderBy("createdAt"));
+    //         const querySnapshot = await getDocs(deliveryQuery);
+    //         const deliveryList = querySnapshot.docs.map(doc => ({
+    //             id: doc.id,
+    //             source: "deliveries",
+    //             createdAt: doc.data().createdAt || "",
+    //             ...doc.data()
+    //         }));
+
+    //         const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
+    //         const riders = riderQuerySnapshot.docs.map(doc => ({
+    //             id: doc.id,
+    //             name: doc.data().name || "Unknown"
+    //         }));
+
+    //         const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
+    //         const shipperList = shipperSnapshot.docs.map(doc => ({
+    //             id: doc.id,
+    //             source: "shipper",
+    //             ...doc.data()
+    //         }));
+
+    //         const riderMap = new Map(riders.map(rider => [rider.id, rider.name]));
+
+    //         const updatedDeliveries = deliveryList.map(delivery => ({
+    //             ...delivery,
+    //             riderName: riderMap.get(delivery.riderId) || "Unknown"
+    //         }));
+
+    //         const combinedData = [...updatedDeliveries, ...shipperList];
+
+    //         setData(combinedData);
+    //         setFilteredData(combinedData);
+    //         setRiderList(riders);
+    //     } catch (error) {
+    //         console.error("Error fetching deliveries:", error);
+    //     }
+    //     setLoading(false);
+    // };
+
+    // ✅ Updated applyFilters function
     const fetchDeliveries = async () => {
         setLoading(true);
         try {
             const deliveryQuery = query(collection(fireStore, "deliveries"), orderBy("createdAt"));
-            const querySnapshot = await getDocs(deliveryQuery);
-            const deliveryList = querySnapshot.docs.map(doc => ({
+            const deliverySnapshot = await getDocs(deliveryQuery);
+            const deliveryList = deliverySnapshot.docs.map(doc => ({
                 id: doc.id,
                 source: "deliveries",
                 createdAt: doc.data().createdAt || "",
                 ...doc.data()
             }));
-
-            const riderQuerySnapshot = await getDocs(collection(fireStore, "riders"));
-            const riders = riderQuerySnapshot.docs.map(doc => ({
+            const riderSnapshot = await getDocs(collection(fireStore, "riders"));
+            const riders = riderSnapshot.docs.map(doc => ({
                 id: doc.id,
                 name: doc.data().name || ""
             }));
-
+            const userBookingSnapshot = await getDocs(collection(fireStore, "User Booking"));
+            const usershipperList = userBookingSnapshot.docs.map(doc => ({
+                id: doc.id,
+                source: "User Booking",
+                ...doc.data()
+            }));
             const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
             const shipperList = shipperSnapshot.docs.map(doc => ({
                 id: doc.id,
                 source: "shipper",
                 ...doc.data()
             }));
-
             const riderMap = new Map(riders.map(rider => [rider.id, rider.name]));
-
+            const createdByIds = new Set();
+            deliveryList.forEach(item => item.Created_By && createdByIds.add(item.Created_By));
+            usershipperList.forEach(item => item.Created_By && createdByIds.add(item.Created_By));
+            const userNameMap = new Map();
+            for (const uid of createdByIds) {
+                const userRef = doc(fireStore, "users", uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    userNameMap.set(uid, userSnap.data().fullName || "Unknown User");
+                }
+            }
             const updatedDeliveries = deliveryList.map(delivery => ({
                 ...delivery,
-                riderName: riderMap.get(delivery.riderId) || ""
+                riderName: riderMap.get(delivery.riderId) || "",
+                createdByName: userNameMap.get(delivery.Created_By) || ""
             }));
-
-            const combinedData = [...updatedDeliveries, ...shipperList];
-
+            const updatedUserBookings = usershipperList.map(booking => ({
+                ...booking,
+                riderName: "",
+                createdByName: userNameMap.get(booking.Created_By) || ""
+            }));
+            const combinedData = [...updatedDeliveries, ...updatedUserBookings, ...shipperList];
             setData(combinedData);
             setFilteredData(combinedData);
             setRiderList(riders);
         } catch (error) {
             console.error("Error fetching deliveries:", error);
+            message.error("Failed to fetch data");
         }
         setLoading(false);
     };
-
-    // ✅ Updated applyFilters function
     const applyFilters = () => {
         let filtered = [...data];
 
@@ -495,7 +556,7 @@ const AddShipment = () => {
 
         setFilteredData(filtered);
     };
-    const deleteByMonth = async () => {
+    const deleteByMonth = async (id) => {
         if (!selectedMonth) {
             message.warning("Please select a month to delete.");
             return;
@@ -515,7 +576,7 @@ const AddShipment = () => {
             const deletePromises = itemsToDelete.map(async (item) => {
                 const deliveryRef = doc(fireStore, "deliveries", item.id);
                 const shipperRef = doc(fireStore, "shipper", item.id);
-
+                const bookingRef = doc(fireStore, "User Booking", id);
                 const deliverySnap = await getDoc(deliveryRef);
                 const shipperSnap = await getDoc(shipperRef);
 
@@ -556,7 +617,7 @@ const AddShipment = () => {
             const deletePromises = selectedRowKeys.map(async (id) => {
                 const deliveryRef = doc(fireStore, "deliveries", id);
                 const shipperRef = doc(fireStore, "shipper", id);
-
+                const bookingRef = doc(fireStore, "User Booking", id);
                 const deliverySnap = await getDoc(deliveryRef);
                 const shipperSnap = await getDoc(shipperRef);
 
@@ -590,11 +651,11 @@ const AddShipment = () => {
     return (
         <main className="auth">
             <Container className="my-3">
+                <span level={1} className="text  d-flex justify-content-center align-items-center display-3 fw-medium text-light mt-4 ">Show Data</span>
                 <Row>
                     <Col span={24} className="mt-5">
-                        <Title level={1} className="text-light">Show Data</Title>
-                        <Card className="border-1 mt-5 border-black">
-                            <Card className="border-0">
+                        <Card className="border-0 card2 ">
+                            <Card className="border-0 ">
                                 <Row>
                                     <Col span={12}>
                                         <Select
@@ -672,12 +733,12 @@ const AddShipment = () => {
                                         key: "riderName",
                                         render: (record) => {
                                             const rider = riderList.find((r) => r.id === record.riderId);
-                                            return rider ? rider.name : "";
+                                            return rider ? rider.name : "Unknown";
                                         },
                                     },
                                     { title: "Shipper Name", dataIndex: "shipperName", key: "shipperName" },
                                     { title: "CN Number", dataIndex: "cnNumber", key: "cnNumber" },
-                                    { title: "Consignee Name", dataIndex: "consignee" || "consignee", key: "consignee" },
+                                    { title: "Consignee Name", dataIndex: "consigneeName" || "consignee", key: "consignee" },
                                     { title: "Date", dataIndex: "date", key: "date" }
                                 ]}
                                 loading={loading}

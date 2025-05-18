@@ -7,7 +7,7 @@ import { DeleteFilled, EditFilled } from "@ant-design/icons";
 import { Container } from "react-bootstrap";
 
 
-const ShowData = () => {
+const AllShowData = () => {
     const { Title } = Typography;
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -23,7 +23,6 @@ const ShowData = () => {
     const [form] = Form.useForm();
     const inputRefs = useRef([]);
     const [companySearch, setCompanySearch] = useState('');
-    const [isLoading, setIsLoading] = useState()
 
     useEffect(() => {
         fetchDeliveries();
@@ -51,6 +50,12 @@ const ShowData = () => {
                 source: "User Booking",
                 ...doc.data()
             }));
+            const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
+            const shipperList = shipperSnapshot.docs.map(doc => ({
+                id: doc.id,
+                source: "shipper",
+                ...doc.data()
+            }));
             const riderMap = new Map(riders.map(rider => [rider.id, rider.name]));
             const createdByIds = new Set();
             deliveryList.forEach(item => item.Created_By && createdByIds.add(item.Created_By));
@@ -73,16 +78,15 @@ const ShowData = () => {
                 riderName: "",
                 createdByName: userNameMap.get(booking.Created_By) || ""
             }));
-            const combinedData = [...updatedDeliveries, ...updatedUserBookings];
+            const combinedData = [...updatedDeliveries, ...updatedUserBookings, ...shipperList];
             setData(combinedData);
             setFilteredData(combinedData);
             setRiderList(riders);
         } catch (error) {
             console.error("Error fetching deliveries:", error);
             message.error("Failed to fetch data");
-        } finally {
-            setLoading(false);
         }
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -139,31 +143,44 @@ const ShowData = () => {
         setIsModalVisible(true);
     };
     const handleDelete = async (id) => {
-        try {
-            let deleted = false;
-            const deliveryRef = doc(fireStore, "deliveries", id);
-            const deliverySnap = await getDoc(deliveryRef);
-            if (deliverySnap.exists()) {
-                await deleteDoc(deliveryRef);
-                deleted = true;
-            }
-            const shipperRef = doc(fireStore, "shipper", id);
-            const shipperSnap = await getDoc(shipperRef);
-            if (shipperSnap.exists()) {
-                await deleteDoc(shipperRef);
-                deleted = true;
-            }
-            if (deleted) {
-                setData(prevData => prevData.filter(item => item.id !== id));
-                message.success("Delivery deleted successfully!");
-            } else {
-                message.warning("No matching delivery found to delete.");
-            }
-        } catch (error) {
-            console.error("Error deleting delivery:", error);
-            message.error("Failed to delete delivery!");
+    try {
+        const deliveryRef = doc(fireStore, "deliveries", id);
+        const bookingRef = doc(fireStore, "User Booking", id);
+        const shipperRef = doc(fireStore, "shipper", id);
+
+        const [deliverySnap, bookingSnap, shipperSnap] = await Promise.all([
+            getDoc(deliveryRef),
+            getDoc(bookingRef),
+            getDoc(shipperRef),
+        ]);
+
+        let deleted = false;
+
+        if (bookingSnap.exists()) {
+            await deleteDoc(bookingRef);
+            deleted = true;
         }
-    };
+        if (deliverySnap.exists()) {
+            await deleteDoc(deliveryRef);
+            deleted = true;
+        }
+        if (shipperSnap.exists()) {
+            await deleteDoc(shipperRef);
+            deleted = true;
+        }
+
+        if (deleted) {
+            setData(prevData => prevData.filter(item => item.id !== id));
+            message.success("Delivery deleted successfully!");
+        } else {
+            message.warning("No matching delivery found to delete.");
+        }
+    } catch (error) {
+        console.error("Error deleting delivery:", error);
+        message.error("Failed to delete delivery!");
+    }
+};
+
 
     const handleKeyPress = (e, index) => {
         if (e.key === "Enter") {
@@ -177,7 +194,6 @@ const ShowData = () => {
 
     const handleReciverChange = (e, cnNumber) => { const { value } = e.target; setNewReceiver((prev) => ({ ...prev, [cnNumber]: value })) };
     const handleSaveReceiver = async () => {
-        setIsLoading(true)
         try {
             const batch = writeBatch(fireStore);
             let hasUpdates = false;
@@ -239,8 +255,6 @@ const ShowData = () => {
         } catch (error) {
             console.error("🔥 Error saving receiver names:", error);
             message.error("❌ Failed to save receiver names!");
-        }finally {
-            setIsLoading(false);
         }
     };
 
@@ -310,7 +324,10 @@ const ShowData = () => {
         {
             title: "Rider Name",
             key: "riderName",
-            dataIndex: "riderName"
+            render: (record) => {
+                const rider = riderList.find((r) => r.id === record.riderId);
+                return rider ? rider.name : "";
+            },
         },
         {
             title: "Shipper Name",
@@ -352,7 +369,7 @@ const ShowData = () => {
             key: "actions",
             render: (_, record) => (
                 <>
-                    <Button className="border-0 rounded-5 ms-2" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={() => handleEdit(record)}>
+                    <Button className="border-0 rounded-5" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={() => handleEdit(record)}>
                         <EditFilled />
                     </Button>
                     <Popconfirm
@@ -361,7 +378,7 @@ const ShowData = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="ms-2 border-0 rounded-5 text-light" style={{ backgroundColor: "#fb0056" }}>
+                        <Button className=" border-0 rounded-5 text-light" style={{backgroundColor : "#fb0056"}}>
                             <DeleteFilled />
                         </Button>
                     </Popconfirm>
@@ -373,9 +390,9 @@ const ShowData = () => {
     return (
         <main className="auth">
             <Container className="my-3" >
-                <span level={1} className="text  d-flex justify-content-center align-items-center display-3 fw-medium text-light mt-3 ">Show Data</span>
+                <span level={1} className="text  d-flex justify-content-center align-items-center display-3 fw-medium text-light ">Show Data</span>
                 <Row>
-                    <Col span={24} className="mt-5">
+                    <Col span={24} className="mt-2">
                         <Card className="border-0 card2  ">
                             <Card className="border-0">
                                 <Row>
@@ -398,23 +415,23 @@ const ShowData = () => {
 
                                     </Col>
                                     <Col span={12}>
-                                        <DatePicker className="w-75 border-1 border-primary-subtle rounded-5" placeholder="Select Date" onChange={setSelectedDate} />
+                                        <DatePicker className="w-75 border-1 border-primary-subtle rounded-5 " placeholder="Select Date" onChange={setSelectedDate} />
                                         <Button className="ms-2  text-light rounded-pill border-0" style={{ backgroundColor: "#3E5151" }} onClick={applyFilters}>Apply Filters</Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Input className="w-75 border-1 border-primary-subtle rounded-5" placeholder="Enter Company Name" value={companySearch} onChange={(e) => setCompanySearch(e.target.value)} allowClear />
+                                        <Input className="w-75 border-1 border-primary-subtle rounded-5 " placeholder="Enter Company Name" value={companySearch} onChange={(e) => setCompanySearch(e.target.value)} allowClear />
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Input className="w-75 border-1 border-primary-subtle rounded-5" placeholder="Enter CN Number" value={searchValue} onChange={handleSearchChange} allowClear />
+                                        <Input className="w-75 border-1 border-primary-subtle rounded-5 " placeholder="Enter CN Number" value={searchValue} onChange={handleSearchChange} allowClear />
                                         <Button style={{ backgroundColor: "grayText" }} className="ms-2 text-light rounded-pill border-0" onClick={handleSearchClick}>
                                             Search
                                         </Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Button loading={isLoading} className="border-0 rounded-5 ms-2" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={handleSaveReceiver}>
+                                        <Button className="border-0 rounded-5 ms-2" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={handleSaveReceiver}>
                                             Save  Names
                                         </Button>
-                                        <Button onClick={() => { setFilteredData(data); setSearchValue(""); setSelectedDate(null); }} className="ms-2 border-0 rounded-5 text-light" style={{ backgroundColor: "#fb0056" }}>
+                                        <Button className="ms-2 border-0 rounded-5 text-light" style={{backgroundColor : "#fb0056"}} onClick={() => { setFilteredData(data); setSearchValue(""); setSelectedDate(null); }} >
                                             Reset
                                         </Button>
                                     </Col>
@@ -448,4 +465,4 @@ const ShowData = () => {
     );
 };
 
-export default ShowData;
+export default AllShowData;

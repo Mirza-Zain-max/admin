@@ -19,6 +19,7 @@ import UserBoking from '../../user/user-booking';
 import UserData from '../../user/user-data';
 import User from '../Admin/User';
 import AdminShowData from '../DashBoard/admin-data';
+import AllShowData from '../DashBoard/AllShowData';
 // import AdminDashboard from '../Admin/Admin-Dashboard';
 // import Setting from '../Admin/Setting';
 // import User from '../Admin/User';
@@ -57,6 +58,7 @@ const FrontEnd = () => {
           <Route path="/admin/view-sheet" element={<ViewSheet />} />
           <Route path="/admin/user" element={<User />} />
           <Route path='/admin/admin-data' element={<AdminShowData/>} /> 
+          <Route path='/admin/allShowData' element={<AllShowData/>} /> 
         </Route>
       </Route>
       <Route path="*" element={<div > Page not found </div>} />

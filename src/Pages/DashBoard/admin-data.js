@@ -23,8 +23,8 @@ const AdminShowData = () => {
     const [editingRecord, setEditingRecord] = useState(null)
     const [form] = Form.useForm();
     const inputRefs = useRef([]);
-    const [isLoading , setIsLoading] = useState()
-    const [isLoading2 , setIsLoading2] = useState()
+    const [isLoading, setIsLoading] = useState()
+    const [isLoading2, setIsLoading2] = useState()
 
     useEffect(() => {
         fetchDeliveries();
@@ -63,8 +63,9 @@ const AdminShowData = () => {
             setRiderList(riders);
         } catch (error) {
             console.error("Error fetching deliveries:", error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -177,7 +178,7 @@ const AdminShowData = () => {
         } catch (error) {
             // console.error("Error saving receiver names: ", error);
             message.error("Failed to save receiver names!");
-        }finally{
+        } finally {
             setIsLoading(false)
         }
     };
@@ -212,7 +213,7 @@ const AdminShowData = () => {
         } catch (error) {
             console.error("Error updating record: ", error);
             message.error("Failed to update record!");
-        }finally{
+        } finally {
             setIsLoading2(false)
         }
     };
@@ -303,7 +304,7 @@ const AdminShowData = () => {
             key: "actions",
             render: (_, record) => (
                 <>
-                    <Button className="bg-success text-light" onClick={() => handleEdit(record)}>
+                    <Button className="border-0 rounded-5 ms-2" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={() => handleEdit(record)}>
                         <EditFilled />
                     </Button>
                     <Popconfirm
@@ -312,7 +313,7 @@ const AdminShowData = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="bg-danger  text-light" danger>
+                        <Button className="ms-2 border-0 rounded-5 text-light" style={{backgroundColor : "#fb0056"}}>
                             <DeleteFilled />
                         </Button>
                     </Popconfirm>
@@ -325,9 +326,11 @@ const AdminShowData = () => {
         <main className="auth">
             <Container className="my-3" >
                 <Row>
-                    <Col span={24} className="mt-5">
-                        <Title level={1} className="text-light"> Show Data</Title>
-                        <Card className="border-1 mt-5 border-black">
+                    <Col span={24} className="text-center">
+                        <span className="text-white " style={{ fontSize: 60, fontWeight: 600, fontFamily: "inherit" }}>Show Data</span>
+                    </Col>
+                    <Col span={24} className="mt-3">
+                        <Card className="border-0  card2">
                             <Card className="border-0">
                                 <Row>
                                     <Col span={12}>
@@ -340,7 +343,7 @@ const AdminShowData = () => {
                                                 option?.label?.toLowerCase().includes(input.toLowerCase())
                                             }
                                             allowClear
-                                            className="w-75"
+                                            className="w-75 border-1 border-primary-subtle"
                                             options={[
                                                 { value: null, label: "All Riders" },
                                                 ...riderList.map(rider => ({ value: rider.id, label: rider.name }))
@@ -349,18 +352,21 @@ const AdminShowData = () => {
 
                                     </Col>
                                     <Col span={12}>
-                                        <DatePicker className="border-1 w-75 border-black" placeholder="Select Date" onChange={setSelectedDate} />
-                                        <Button className="ms-2 bg-black text-light" onClick={applyFilters}>Apply Filters</Button>
+                                        <DatePicker className="w-75 border-1 border-primary-subtle rounded-5 " placeholder="Select Date" onChange={setSelectedDate} />
+                                        <Button className="ms-2 border-0 rounded-5 text-light" style={{backgroundColor : "#fb0056"}} onClick={applyFilters}>Apply Filters</Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Input className="border-1 w-75 border-black" placeholder="Enter CN Number" value={searchValue} onChange={handleSearchChange} allowClear />
-                                        <Button type="primary" className="ms-2" onClick={handleSearchClick}>
+                                        <Input className="w-75 border-1 border-primary-subtle rounded-5 " placeholder="Enter CN Number" value={searchValue} onChange={handleSearchChange} allowClear />
+                                        <Button  className="ms-2 bg-primary-subtle rounded-5" onClick={handleSearchClick}>
                                             Search
                                         </Button>
                                     </Col>
                                     <Col span={12} className="mt-3">
-                                        <Button loading={isLoading} className=" bg-success text-light ms-2" onClick={handleSaveReceiver}>
+                                        <Button loading={isLoading} className="border-0 rounded-5 ms-2" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={handleSaveReceiver}>
                                             Save  Names
+                                        </Button>
+                                         <Button  className="ms-2 border-0 rounded-5 text-light" style={{backgroundColor : "#fb0056"}} onClick={() => { setFilteredData(data); setSearchValue(""); setSelectedDate(null); }}>
+                                            Reset
                                         </Button>
                                     </Col>
                                 </Row>

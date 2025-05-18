@@ -39,17 +39,17 @@ const ScreenLoader = () => {
                     <div id="div14"></div>
                     <div id="div15"></div>
                 </div> */}
-<div class="banter-loader">
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-  <div class="banter-loader__box"></div>
-</div>
+                <div className="banter-loader">
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                    <div className="banter-loader__box"></div>
+                </div>
 
 
             </main>

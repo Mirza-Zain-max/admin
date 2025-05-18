@@ -128,9 +128,9 @@ const UserBoking = () => {
     <main className="auth d-flex justify-content-center align-items-center">
       <Container>
         <h1 className="text-center text-white mb-4">{userFullName}</h1>
-        <Row className="my-3">
-          <Col md={24} lg={12}>
-            <Card className="border-1 border-black rounded-5" >
+        <Row className="my-3 ">
+          <Col md={24} lg={12} className="">
+            <Card className="border-0 card2  rounded-5" >
               <Row>
                 <Col xs={24} md={24} lg={12} className="px-2 py-1">
                   <label className="fw-bolder w-100 mb-1">Date:</label>
@@ -157,7 +157,7 @@ const UserBoking = () => {
             </Card>
           </Col>
           <Col lg={12}>
-            <Card className="border-1 overflow-auto flex-wrap border-black rounded-5">
+            <Card className="border-0 card2  overflow-auto flex-wrap ms-2 rounded-5">
               <Row>
                 <Col span={24} className="px-2 py-1">
                   <label className="mb-1 fw-bolder">Consignee Name:</label>

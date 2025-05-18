@@ -60,7 +60,7 @@ const Login = () => {
             localStorage.setItem('user-login', 'true');
             localStorage.setItem('user-role', 'admin');
             localStorage.setItem('user-uid', 'admin-uid');
-            navigate('/admin/add', { replace: true });
+            navigate('/admin/boking', { replace: true });
             window.location.reload();
             return;
         }
@@ -98,7 +98,8 @@ const Login = () => {
         <main className='auth p-3 p-md-4 p-lg-5'>
             <Fade cascade damping={0.1}>
                 <Container>
-                    <div className="card p-3 p-md-4 p-lg-4">
+                  <div className='card2 rounded-5 '>
+                      <div className="card rounded-5 bg-white p-3 p-md-4 p-lg-4">
                         <Form layout="vertical" onSubmitCapture={handleSubmit}>
                             <h1 className='mb-4 text-center'><i>Login</i></h1>
                             <Row gutter={[0, 16]}>
@@ -113,7 +114,7 @@ const Login = () => {
                                     </Form.Item>
                                 </Col>
                                 <Col span={24}>
-                                    <Button type='primary' htmlType='submit' loading={isProcessing} className='w-100'>
+                                    <Button  htmlType='submit' loading={isProcessing} className="border-0 rounded-5 ms-2 w-100 py-4" style={{ backgroundColor: "#007991", color: "#fff" , fontSize: 25 ,fontWeight : 600 }}>
                                         Login
                                     </Button>
                                 </Col>
@@ -139,6 +140,7 @@ const Login = () => {
                             </Row>
                         </Form>
                     </div>
+                  </div>
                 </Container>
             </Fade>
         </main>
