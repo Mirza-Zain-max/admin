@@ -108,10 +108,6 @@ function SideBar({ children }) {
                                 </>
                                 : <>
                                     <Dropdown.Item as={"div"}>
-                                        <span className='text-dark nav-link  text-center  fw-bold p-1' to="/admin/booking" onClick={showModal}>Data Deleted</span>
-                                    </Dropdown.Item>
-                                    <hr />
-                                    <Dropdown.Item as={"div"}>
                                         <span className='text-dark nav-link  text-center  fw-bold p-1' to="/admin/user" onClick={showModal}>Login User</span>
                                     </Dropdown.Item>
                                     <hr />
