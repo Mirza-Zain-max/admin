@@ -31,31 +31,47 @@ const Boking = () => {
       [name]: value,
     }));
   };
-  const handleTrackCourier = async () => {
-    try {
-      if (!form.cnNumber) {
-        message.error("Please enter a CN Number to track.");
-        return;
-      }
-
-      const querySnapshot = await getDocs(collection(fireStore, "shipper"));
-      const trackingData = querySnapshot.docs.find(
-        (doc) => doc.data().cnNumber === form.cnNumber
-      );
-
-      if (trackingData) {
-        const courierInfo = trackingData.data();
-        message.success("Courier found!");
-        setTrackingResult(courierInfo);
-      } else {
-        message.error("No record found for this CN Number.");
-        setTrackingResult(null);
-      }
-    } catch (error) {
-      console.error("Error tracking courier:", error);
-      message.error("Error tracking courier: " + error.message);
+ const handleTrackCourier = async () => {
+  try {
+    if (!form.cnNumber || !form.cnNumber.trim()) {
+      message.error("Please enter a CN Number to track.");
+      return;
     }
-  };
+
+    // First, check in 'shipper' collection
+    const shipperSnapshot = await getDocs(collection(fireStore, "shipper"));
+    const shipperData = shipperSnapshot.docs.find(
+      (doc) => doc.data().cnNumber === form.cnNumber
+    );
+
+    if (shipperData) {
+      message.success("Courier found in Shipper collection!");
+      setTrackingResult({ ...shipperData.data(), source: "shipper" });
+      return;
+    }
+
+    // If not found, check in 'User Booking' collection
+    const bookingSnapshot = await getDocs(collection(fireStore, "User Booking"));
+    const bookingData = bookingSnapshot.docs.find(
+      (doc) => doc.data().cnNumber === form.cnNumber
+    );
+
+    if (bookingData) {
+      message.success("Courier found in User Booking collection!");
+      setTrackingResult({ ...bookingData.data(), source: "User Booking" });
+      return;
+    }
+
+    // Not found in either
+    message.error("No record found for this CN Number.");
+    setTrackingResult(null);
+
+  } catch (error) {
+    console.error("Error tracking courier:", error);
+    message.error("Error tracking courier: " + error.message);
+  }
+};
+
 
   const handleAddCourier = async () => {
     const timestamp = new Date().toISOString();
