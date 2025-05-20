@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { Page, Text, View, Document, StyleSheet, pdf, Font, Image } from '@react-pdf/renderer';
 import { Button, Modal, Spin } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { EyeOutlined, IeOutlined } from '@ant-design/icons';
 // import { FileTextFilled } from '@ant-design/icons';
-import logo from "../Assets/booking.png"
+import logo from "../Assets/logo.png"
 Font.register({
   family: 'Arial',
   fonts: [
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   infoColLast: { flex: 1, padding: 4 },
   infoBox: { width: "100px" },
   label: { fontSize: 9, fontFamily: 'Arial', fontWeight: "bold" },
-  value: { fontSize: 9, flexDirection: "column" },
+  value: { fontSize: 9, flexDirection: "column", textAlign: "left", fontFamily: 'Arial', fontWeight: "normal" },
   addressSection: { flexDirection: 'row', borderBottom: 1, borderColor: '#000000' },
   addressCol: { flex: 1, padding: 6, borderRight: 1, borderColor: '#000000' },
   addressCALL: { alignItems: "flex-end", fontWeight: "bold" },
@@ -76,20 +76,20 @@ const QuotationPDF = ({ form }) => (
             <View>
               <Text style={styles.value}>{form.shipperName}</Text>
               <Text style={styles.value}>{form.trackingId}</Text>
-            </View>
-            <View style={styles.addressCALL}>
               <Text style={styles.value}>{form.contact}</Text>
             </View>
+            {/* <View style={styles.addressCALL}>
+            </View> */}
           </View>
           <View style={styles.addressCol}>
             <Text style={styles.label}>Consignee:</Text>
             <View>
               <Text style={styles.value}>{form.consignee}</Text>
               <Text style={styles.value}>{form.consigneeAddress}</Text>
-            </View>
-            <View style={styles.addressCALL}>
               <Text style={styles.value}>{form.consigneeContact}</Text>
             </View>
+            {/* <View style={styles.addressCALL}>
+            </View> */}
           </View>
         </View>
         <View style={styles.detailsRow}>

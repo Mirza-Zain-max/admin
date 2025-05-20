@@ -5,6 +5,7 @@ import { Container, Table } from "react-bootstrap";
 import { fireStore } from "../../Config/firebase";
 import { addDoc, collection, onSnapshot } from "firebase/firestore";
 import "./Style.css";
+import { set } from "lodash";
 
 const TrackShipment = () => {
     const [deliveries, setDeliveries] = useState([]);
@@ -17,6 +18,7 @@ const TrackShipment = () => {
     const [isLoading, setIsLoading] = useState(false)
     useEffect(() => {
         const fetchData = () => {
+            setIsLoading(true);
             try {
                 const deliveriesUnsub = onSnapshot(collection(fireStore, "deliveries"), (snapshot) => {
                     const deliveriesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -43,6 +45,9 @@ const TrackShipment = () => {
 
             } catch (error) {
                 message.error("Failed to fetch data.");
+            }
+            finally{
+                setIsLoading(false);
             }
         };
 
@@ -74,7 +79,6 @@ const TrackShipment = () => {
         }
     };
     const trackShipment = () => {
-        setIsLoading(true)
         if (!trackCN.trim()) {
             message.warning("Please enter a CN Number.");
             return;
@@ -102,9 +106,6 @@ const TrackShipment = () => {
             setTrackResult(null);
             message.error("Not found with this CN Number.");
         }
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 2000)
     };
     const handleKeyPress = (event) => { if (event.key === "Enter") trackShipment(); };
     return (
@@ -118,15 +119,14 @@ const TrackShipment = () => {
                         <Card className="mt-5 card2" style={{ backgroundColor: "#fff" }}>
                             <label className="fw-bolder mb-4">Enter CN Number:</label>
                             <Input className="mb-4" type="text" value={trackCN} onChange={handleTrackCNChange} onKeyDown={handleKeyPress} placeholder="Enter CN Number" />
-                            <div className="d-flex justify-content-center align-items-center">
+                            <div className="d-flex justify-content-center mb-4 align-items-center">
                                 <Button loading={isLoading} className="me-2 w-50 border-0 p-4 rounded-5 mt-2 fs-4 fw-medium" style={{ backgroundColor: "#007991", color: "#fff" }} onClick={trackShipment}>
-                                    Save Rider
+                                    Track Shipment
                                 </Button>
                             </div>
                             <Button className="w-25 p-3 d-none" type="primary" onClick={saveTrackingData}>
                                 Save
                             </Button>
-
                             {trackResult ? (
                                 <div className="table-container">
                                     <Table responsive border="2" bordered className="desktop-table">

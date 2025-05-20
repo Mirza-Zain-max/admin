@@ -156,7 +156,7 @@ const ViewSheet = () => {
               {deliverySheetData.length > 0 ? (
                 <div style={{ textAlign: 'center' }}>
                   <hr />
-                  <h2 className="text-center my-4 text-light ">{deliverySheetData[0]?.riderName}</h2>
+                  <h2 className="text-center my-4 " style={{color :"#659999"}}>{deliverySheetData[0]?.riderName}</h2>
                   <Table bordered scroll={{ x: 1000 }} columns={columns} dataSource={indexedDeliverySheetData} rowKey="id" pagination={false} className="text-center border-2 h-auto" />
                   <Button className="text-light w-50 p-4 rounded-5" onClick={downloadPDFSheet} style={{ marginTop: "1rem" ,backgroundColor: "#27584a" }}>
                     Download as PDF

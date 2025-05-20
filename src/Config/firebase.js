@@ -27,6 +27,16 @@ import { collection, getCountFromServer, getFirestore } from "firebase/firestore
     appId: "1:32656532061:web:1cd6648fbced591d76a3b4",
     measurementId: "G-F5FVSEJEX5"
   };
+
+//   const firebaseConfig = {
+//   apiKey: "AIzaSyACP6zBZ_YjSrobzDLIrDSHMdT7bvSNx-s",
+//   authDomain: "btsproject-5d6e0.firebaseapp.com",
+//   projectId: "btsproject-5d6e0",
+//   storageBucket: "btsproject-5d6e0.firebasestorage.app",
+//   messagingSenderId: "32656532061",
+//   appId: "1:32656532061:web:1cd6648fbced591d76a3b4",
+//   measurementId: "G-F5FVSEJEX5"
+// };
   
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
