@@ -134,7 +134,7 @@ const UserBoking = () => {
               <Row>
                 <Col xs={24} md={24} lg={12} className="px-2 py-1">
                   <label className="fw-bolder w-100 mb-1">Date:</label>
-                  <Input type="date" className="" name="date" value={form.date} onChange={handleChange} onKeyDown={(e) => handleKeyPress(e, "cnNumber")} />
+                  <Input type="date" className="" name="date" value={new Date().toISOString().split("T")[0]} placeholder={new Date().toISOString().split("T")[0]} onKeyDown={(e) => handleKeyPress(e, "cnNumber")} disabled />
                 </Col>
                 <Col xs={24} md={24} lg={12} className="px-2 py-1">
                   <label className="mb-1 fw-bolder">CN Number:</label>
