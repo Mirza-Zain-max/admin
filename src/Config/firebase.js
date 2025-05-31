@@ -18,16 +18,14 @@ import { collection, getCountFromServer, getFirestore } from "firebase/firestore
   //   measurementId: "G-BDGTWDJK3S"
   // };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyACP6zBZ_YjSrobzDLIrDSHMdT7bvSNx-s",
-    authDomain: "btsproject-5d6e0.firebaseapp.com",
-    projectId: "btsproject-5d6e0",
-    storageBucket: "btsproject-5d6e0.firebasestorage.app",
-    messagingSenderId: "32656532061",
-    appId: "1:32656532061:web:1cd6648fbced591d76a3b4",
-    measurementId: "G-F5FVSEJEX5"
-  };
-
+const firebaseConfig = {
+  apiKey: "AIzaSyBVA38gfo0p1YlyZaq5FwRTYeIj2MNt81w",
+  authDomain: "sonic-express-93c85.firebaseapp.com",
+  projectId: "sonic-express-93c85",
+  storageBucket: "sonic-express-93c85.firebasestorage.app",
+  messagingSenderId: "690119339871",
+  appId: "1:690119339871:web:4c3f88c1bafdebc10510ea"
+};
 //   const firebaseConfig = {
 //   apiKey: "AIzaSyACP6zBZ_YjSrobzDLIrDSHMdT7bvSNx-s",
 //   authDomain: "btsproject-5d6e0.firebaseapp.com",

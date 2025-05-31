@@ -13,9 +13,9 @@ function Header1() {
       <Container>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Link className='text-light nav-link mx-3 fw-bold ' to="/user-booking">Booking</Link>
-          <Link className='text-light nav-link mx-3 fw-bold ' to="/user-data">Show Data</Link>
-          <Link className='text-light nav-link  text-center  fw-bold p-1' onClick={handleLogout} >Logout</Link>
+          <Link className='text-light nav-link m-3 fw-bold ' to="/user-booking">Booking</Link>
+          <Link className='text-light nav-link m-3 fw-bold ' to="/user-data">Show Data</Link>
+          <Link className='text-light nav-link  m-3 fw-bold p-1' onClick={handleLogout} >Logout</Link>
         </Navbar.Collapse>
       </Container>
     </Navbar>
